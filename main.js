@@ -1,55 +1,102 @@
-var gl = null,
-	canvas = null,
-	glProgram = null,
-	fragmentShader = null,
-	vertexShader = null,
-	tick = 0.0;
-	my_grid = null;
-
+var gl = null;
+var canvas = null;
+var programManager = null;
 var mMatrix = mat4.create();
-var vMatrix = mat4.create();
 var pMatrix = mat4.create();
+var vMatrix = mat4.create();
+var my_grid = null;
 
-function getShader(gl, id) {
-	var shaderScript, src, currentChild, shader;
+function ProgramManager() {
+    // Attribs
+	this.programs = [];
+    this.shaders = [];
+    // Methods
+    // Agregar y compilar un shader
+    this.addShader = function(shaderid) {
+		
+		// Verificamos que no exista
+		if(shaderid in this.shaders) {
+        	alert("Shader `" + shaderid + "` already exists!");
+        	return;
+    	}
+		
+		var shaderScript, src, currentChild, shader;
 
-	// Obtenemos el elemento <script> que contiene el código fuente del shader.
-	shaderScript = document.getElementById(id);
-	if (!shaderScript) return null;
-
-	// Extraemos el contenido de texto del <script>.
-	src = "";
-	currentChild = shaderScript.firstChild;
-	while(currentChild) {
-		if (currentChild.nodeType == currentChild.TEXT_NODE) {
-			src += currentChild.textContent;
+		// Obtenemos el elemento <script> que contiene el código fuente del shader
+		shaderScript = document.getElementById(shaderid);
+		if(!shaderScript) {
+			alert("Elem `" + shaderid + "` not found");
+			return null;
 		}
-		currentChild = currentChild.nextSibling;
+		// Extraemos el contenido de texto del <script>
+		src = "";
+		currentChild = shaderScript.firstChild;
+		while(currentChild) {
+			if (currentChild.nodeType == currentChild.TEXT_NODE)
+				src += currentChild.textContent;
+			currentChild = currentChild.nextSibling;
+		}
+		// Creamos un shader WebGL según el atributo type del <script>
+		if(shaderScript.type == "x-shader/x-fragment") {
+			shader = gl.createShader(gl.FRAGMENT_SHADER);
+		}else if(shaderScript.type == "x-shader/x-vertex") {
+			shader = gl.createShader(gl.VERTEX_SHADER);
+		}else{
+			alert("Missing or invalid shader type");
+			return;
+		}
+		// Cargamos el fuente y compilamos
+		gl.shaderSource(shader, src);
+		gl.compileShader(shader);  
+		// Chequeamos y reportamos si hubo algún error.
+		if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {  
+			alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader));
+			return;
+		}
+		// Cargamos el shader a la lista
+		this.shaders[shaderid] = {}
+		this.shaders[shaderid].id = shaderid;
+		this.shaders[shaderid].shader = shader;
+		
+    }
+    // Agregar y compilar un programa
+    this.addProgram = function(programid, shaders) {
+        this.programs[programid] = {}
+		// Store program data
+		this.programs[programid].id = programid;
+		this.programs[programid].shaders = shaders;
+		// Create program and attach+link
+		this.programs[programid].program = gl.createProgram();
+		console.log(shaders);
+		shaders.forEach(function(s) {
+			gl.attachShader(this.programs[programid].program, this.shaders[s].shader);
+		});
+		gl.linkProgram(this.programs[programid].program);
+		// Chequeamos y reportamos si hubo algún error.
+		if(!gl.getProgramParameter(this.programs[programid].program, gl.LINK_STATUS)) {
+		  alert("Unable to initialize the shader program: " + gl.getProgramInfoLog(this.programs[programid].program));
+		  return null;
+		}
+		
+    }
+    // Activar un programa
+    this.useProgram = function(program) {
+    	if(!(program in this.programs)) {
+        	alert("Program `" + program + "` not found!");
+        	return;
+    	}
+		gl.useProgram(this.programs[program].program);
+    	//console.log("Activated " + this.programs[program].name);
 	}
+} 
 
-	// Creamos un shader WebGL según el atributo type del <script>.
-	if(shaderScript.type == "x-shader/x-fragment") {
-		shader = gl.createShader(gl.FRAGMENT_SHADER);
-	}else if(shaderScript.type == "x-shader/x-vertex") {
-		shader = gl.createShader(gl.VERTEX_SHADER);
-	}else{
-		return null;
-	}
 
-	// Le decimos a WebGL que vamos a usar el texto como fuente para el shader.
-	gl.shaderSource(shader, src);
-
-	// Compilamos el shader.
-	gl.compileShader(shader);  
-	  
-	// Chequeamos y reportamos si hubo algún error.
-	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {  
-	  alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader));
-	  return null;  
-	}
-	  
-	return shader;
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -169,22 +216,33 @@ function VertexGrid (_cols, _rows) {
 //////////////////////////////////////////////////////////////////////////////
 
 
-function initWebGL() {
+function main() {
+	
+	// Setup canvas
 	canvas = document.getElementById("my-canvas");  
 	try{
 		gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");                    
+		if(!gl) {
+			alert("Error: Your browser does not appear to support WebGL.");
+			return;
+		}
 	}catch(e){
 		alert("Error: canvas.getContext()");
 	}
-					
-	if(gl) {
-		setupWebGL();
-		initShaders();
-		setupBuffers();
-		setInterval(drawScene, 16);  
-	}else{
-		alert(  "Error: Your browser does not appear to support WebGL.");
-	}
+	// Setup
+	setupWebGL();
+	// Load shaders and programs
+	programManager = new ProgramManager();
+	
+	programManager.addShader("basic-vs");
+	programManager.addShader("basic-fs");
+	
+	programManager.addProgram("pepe", ["basic-vs", "basic-fs"]);
+	programManager.useProgram("pepe");
+	
+	setupBuffers();
+	setInterval(drawScene, 16);  
+
 }
 
 function setupWebGL() {
@@ -194,43 +252,6 @@ function setupWebGL() {
 	gl.depthFunc(gl.LEQUAL); 
 	gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 	gl.viewport(0, 0, canvas.width, canvas.height);
-}
-
-function initShaders() {
-	// Obtenemos los shaders ya compilados
-	var fragmentShader = getShader(gl, "basic-fs");
-	var vertexShader = getShader(gl, "basic-vs");
-
-	// Creamos un programa de shaders de WebGL.
-	glProgram = gl.createProgram();
-
-	// Asociamos cada shader compilado al programa.
-	gl.attachShader(glProgram, vertexShader);
-	gl.attachShader(glProgram, fragmentShader);
-
-	// Linkeamos los shaders para generar el programa ejecutable.
-	gl.linkProgram(glProgram);
-
-	// Chequeamos y reportamos si hubo algún error.
-	if(!gl.getProgramParameter(glProgram, gl.LINK_STATUS)) {
-	  alert("Unable to initialize the shader program: " + gl.getProgramInfoLog(glProgram));
-	  return null;
-	}
-
-	// Le decimos a WebGL que de aquí en adelante use el programa generado.
-	gl.useProgram(glProgram);
-}
-
-function makeShader(src, type) {
-	//compile the vertex shader
-	var shader = gl.createShader(type);
-	gl.shaderSource(shader, src);
-	gl.compileShader(shader);
-
-	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-		alert("Error compiling shader: " + gl.getShaderInfoLog(shader));
-	}
-	return shader;
 }
 
 function setupBuffers() {
