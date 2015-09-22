@@ -6,15 +6,17 @@
             attribute vec3 aVertexPosition;
             attribute vec3 aVertexColor;
 
-            uniform mat4 uMVMatrix;
-            uniform mat4 uPMatrix;
+			uniform mat4 uModelMatrix;
+            uniform mat4 uViewMatrix;
+            uniform mat4 uProjectionMatrix;
 			uniform float uTick;
 			
             varying vec4 vColor;
 			
             void main(void) {
-                gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition.xy, sin(aVertexPosition.x + uTick) * cos(aVertexPosition.y + uTick), 1.0);
-                vColor = vec4(aVertexColor, 1.0);
+				float z = 15.0*cos(uTick*0.5)*exp(-( pow(aVertexPosition.x-15.0, 2.0)/5.0 + pow(aVertexPosition.y-15.0, 2.0) )/5.0);
+                gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aVertexPosition.xy, z, 1.0);
+                vColor = vec4(aVertexColor.rg, z*0.05+0.5, 1.0);
             }
         </script>
         <script id="basic-fs" type="x-shader/x-fragment">
@@ -29,7 +31,7 @@
     </head>
     <body onload="initWebGL()">
 		<center>
-			<canvas id="my-canvas" width="900" height="500">
+			<canvas id="my-canvas" width="1280" height="720">
 			Your browser does not support the HTML5 canvas element.
 			</canvas>
 		</center>

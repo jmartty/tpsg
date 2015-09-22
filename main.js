@@ -3,10 +3,11 @@ var gl = null,
 	glProgram = null,
 	fragmentShader = null,
 	vertexShader = null,
-	t = 0.0;
+	tick = 0.0;
 	my_grid = null;
 
-var mvMatrix = mat4.create();
+var mMatrix = mat4.create();
+var vMatrix = mat4.create();
 var pMatrix = mat4.create();
 
 function getShader(gl, id) {
@@ -78,19 +79,19 @@ function VertexGrid (_cols, _rows) {
 		this.index_buffer = [];
 		offset = 0;
 		for(y = 0; y < this.rows-1; y++) {
+			// Degenerate begin: repeat first vertex
 			if (y > 0) {
-				// Degenerate begin: repeat first vertex
 				this.index_buffer[offset++] = y * this.cols;
 			}
 
+			// Draw one strip
 			for (x = 0; x < this.cols; x++) {
-				// One part of the strip
 				this.index_buffer[offset++] = (y * this.cols) + x;
 				this.index_buffer[offset++] = ((y+1) * this.cols) + x;
 			}
 
+			// Degenerate end: repeat last vertex
 			if (y < this.rows-2) {
-				// Degenerate end: repeat last vertex
 				this.index_buffer[offset++] = ((y+1) * this.cols) + this.cols-1;
 			}
 		}
@@ -119,7 +120,7 @@ function VertexGrid (_cols, _rows) {
 			   // Para cada vértice definimos su color
 			   this.color_buffer.push(i/this.cols);
 			   this.color_buffer.push(j/this.rows);
-			   this.color_buffer.push(0.75);
+			   this.color_buffer.push(0.0);
 									  
 		   };
 		};
@@ -158,6 +159,7 @@ function VertexGrid (_cols, _rows) {
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
 
 		gl.drawElements(gl.TRIANGLE_STRIP, this.index_buffer.length, gl.UNSIGNED_SHORT, 0);
+
 	}
 }
 //
@@ -167,21 +169,20 @@ function VertexGrid (_cols, _rows) {
 //////////////////////////////////////////////////////////////////////////////
 
 
-function initWebGL()
-{
+function initWebGL() {
 	canvas = document.getElementById("my-canvas");  
 	try{
 		gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");                    
 	}catch(e){
+		alert("Error: canvas.getContext()");
 	}
 					
-	if(gl)
-	{
+	if(gl) {
 		setupWebGL();
 		initShaders();
 		setupBuffers();
-		setInterval(drawScene, 10);  
-	}else{    
+		setInterval(drawScene, 16);  
+	}else{
 		alert(  "Error: Your browser does not appear to support WebGL.");
 	}
 }
@@ -193,8 +194,6 @@ function setupWebGL() {
 	gl.depthFunc(gl.LEQUAL); 
 	gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 	gl.viewport(0, 0, canvas.width, canvas.height);
-	
-	this.utick = 0.0;
 }
 
 function initShaders() {
@@ -235,7 +234,7 @@ function makeShader(src, type) {
 }
 
 function setupBuffers() {
-	my_grid = new VertexGrid(16, 16);
+	my_grid = new VertexGrid(30, 30);
 	my_grid.createUniformPlaneGrid();
 	my_grid.createIndexBuffer();
 	my_grid.setupWebGLBuffers();
@@ -244,22 +243,23 @@ function setupBuffers() {
 function drawScene() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	var u_proj_matrix = gl.getUniformLocation(glProgram, "uPMatrix");
-	// Preparamos una matriz de perspectiva.
-	mat4.perspective(pMatrix, 45, 640.0/480.0, 0.1, 100.0);
+	var u_proj_matrix = gl.getUniformLocation(glProgram, "uProjectionMatrix");
+	mat4.perspective(pMatrix, Math.PI/4, canvas.width/canvas.height, 0.1, 100.0);
 	gl.uniformMatrix4fv(u_proj_matrix, false, pMatrix);
 
-	var u_model_view_matrix = gl.getUniformLocation(glProgram, "uMVMatrix");
-	// Preparamos una matriz de modelo+vista.
-	mat4.lookAt(mvMatrix, [25, 25, 25], [0, 0, 0], [0, 0, 1]);
-	//mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, 0.0]);
-	//mat4.rotate(mvMatrix, mvMatrix, 45.0, [0.0, 0.0, 1.0]);
+	var u_view_matrix = gl.getUniformLocation(glProgram, "uViewMatrix");
+	mat4.lookAt(vMatrix, [35, 35, 35], [0, 0, 0], [0, 0, 1]);
+	gl.uniformMatrix4fv(u_view_matrix, false, vMatrix);
+	
+	var u_model_matrix = gl.getUniformLocation(glProgram, "uModelMatrix");
+	mat4.identity(mMatrix);
+	mat4.translate(mMatrix, mMatrix, [-15.0, -15.0, 0.0]);
+	//mat4.rotate(mMatrix, mMatrix, Math.sin(tick), [0.0, 0.0, 1.0]);
+	gl.uniformMatrix4fv(u_model_matrix, false, mMatrix);
 
-	gl.uniformMatrix4fv(u_model_view_matrix, false, mvMatrix);
-
-	this.utick += 0.05;
+	this.tick += 0.05;
 	var u_tick = gl.getUniformLocation(glProgram, "uTick");
-	gl.uniform1f(u_tick, this.utick);
+	gl.uniform1f(u_tick, this.tick);
 	
 	my_grid.drawVertexGrid();
 }
