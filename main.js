@@ -56,40 +56,42 @@ function getShader(gl, id) {
 //
 // OBJETO VERTEX-GRID
 // Definimos un constructor para el objeto VertexGrid
-function VertexGrid (_rows, _cols) {
+function VertexGrid (_cols, _rows) {
 	if(_cols < 2 || _rows < 2) {
 		alert("Invalid grid size");
 		return null;
 	}
+	
 	this.cols = _cols;
 	this.rows = _rows;
 	this.num_vertices = this.cols * this.rows;
 
 	this.position_buffer = null;
 	this.color_buffer = null;
-	this.index_buffer = [];
+	this.index_buffer = null;
 	
 	this.webgl_position_buffer = null;
 	this.webgl_color_buffer = null;
 	this.webgl_index_buffer = null;
 
 	this.createIndexBuffer = function() {
+		this.index_buffer = [];
 		offset = 0;
 		for(y = 0; y < this.rows-1; y++) {
 			if (y > 0) {
 				// Degenerate begin: repeat first vertex
-				this.index_buffer[offset++] = y * this.rows;
+				this.index_buffer[offset++] = y * this.cols;
 			}
 
 			for (x = 0; x < this.cols; x++) {
 				// One part of the strip
-				this.index_buffer[offset++] = (y * this.rows) + x;
-				this.index_buffer[offset++] = ((y+1) * this.rows) + x;
+				this.index_buffer[offset++] = (y * this.cols) + x;
+				this.index_buffer[offset++] = ((y+1) * this.cols) + x;
 			}
 
 			if (y < this.rows-2) {
 				// Degenerate end: repeat last vertex
-				this.index_buffer[offset++] = ((y+1) * this.rows) + this.cols-1;
+				this.index_buffer[offset++] = ((y+1) * this.cols) + this.cols-1;
 			}
 		}
 		console.log(this.index_buffer);
@@ -105,18 +107,18 @@ function VertexGrid (_rows, _cols) {
 		this.position_buffer = [];
 		this.color_buffer = [];
 
-		for (i = 0.0;i < this.rows; i++) { 
-		   for (j = 0.0;j < this.cols; j++) {
-
+		
+		for (j = 0.0;j < this.rows; j++) {
+			for (i = 0.0;i < this.cols; i++) { 
 			   // Para cada vértice definimos su posición
 			   // como coordenada (x, y, z=0)
-			   this.position_buffer.push(j);
 			   this.position_buffer.push(i);
+			   this.position_buffer.push(j);
 			   this.position_buffer.push(0.0);
 
 			   // Para cada vértice definimos su color
-			   this.color_buffer.push(j/this.rows);
 			   this.color_buffer.push(i/this.cols);
+			   this.color_buffer.push(j/this.rows);
 			   this.color_buffer.push(0.75);
 									  
 		   };
