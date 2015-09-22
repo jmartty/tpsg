@@ -8,12 +8,13 @@
 
             uniform mat4 uMVMatrix;
             uniform mat4 uPMatrix;
-
-            varying vec4 vColor;    
- 
+			uniform float uTick;
+			
+            varying vec4 vColor;
+			
             void main(void) {
-                gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-                vColor = vec4(aVertexColor,1.0);
+                gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition.xy, sin(aVertexPosition.x + uTick) * cos(aVertexPosition.y + uTick), 1.0);
+                vColor = vec4(aVertexColor, 1.0);
             }
         </script>
         <script id="basic-fs" type="x-shader/x-fragment">

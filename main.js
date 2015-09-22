@@ -94,7 +94,7 @@ function VertexGrid (_cols, _rows) {
 				this.index_buffer[offset++] = ((y+1) * this.cols) + this.cols-1;
 			}
 		}
-		console.log(this.index_buffer);
+		//console.log(this.index_buffer);
 	}
 	
 	// Esta función inicializa el position_buffer y el color buffer de forma de 
@@ -123,7 +123,7 @@ function VertexGrid (_cols, _rows) {
 									  
 		   };
 		};
-		console.log(this.position_buffer);
+		//console.log(this.position_buffer);
 	}
 
 	// Esta función crea e incializa los buffers dentro del pipeline para luego
@@ -157,7 +157,7 @@ function VertexGrid (_cols, _rows) {
 
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
 
-		gl.drawElements(gl.LINE_STRIP, this.index_buffer.length, gl.UNSIGNED_SHORT, 0);
+		gl.drawElements(gl.TRIANGLE_STRIP, this.index_buffer.length, gl.UNSIGNED_SHORT, 0);
 	}
 }
 //
@@ -192,8 +192,9 @@ function setupWebGL() {
 	gl.enable(gl.DEPTH_TEST);                              
 	gl.depthFunc(gl.LEQUAL); 
 	gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-	
 	gl.viewport(0, 0, canvas.width, canvas.height);
+	
+	this.utick = 0.0;
 }
 
 function initShaders() {
@@ -234,7 +235,7 @@ function makeShader(src, type) {
 }
 
 function setupBuffers() {
-	my_grid = new VertexGrid(4, 4);
+	my_grid = new VertexGrid(16, 16);
 	my_grid.createUniformPlaneGrid();
 	my_grid.createIndexBuffer();
 	my_grid.setupWebGLBuffers();
@@ -242,6 +243,7 @@ function setupBuffers() {
 
 function drawScene() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
 	var u_proj_matrix = gl.getUniformLocation(glProgram, "uPMatrix");
 	// Preparamos una matriz de perspectiva.
 	mat4.perspective(pMatrix, 45, 640.0/480.0, 0.1, 100.0);
@@ -249,11 +251,15 @@ function drawScene() {
 
 	var u_model_view_matrix = gl.getUniformLocation(glProgram, "uMVMatrix");
 	// Preparamos una matriz de modelo+vista.
-	mat4.lookAt(mvMatrix, [0, 0, 10], [0, 0, 0], [0, 1, 0]);
+	mat4.lookAt(mvMatrix, [25, 25, 25], [0, 0, 0], [0, 0, 1]);
 	//mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, 0.0]);
 	//mat4.rotate(mvMatrix, mvMatrix, 45.0, [0.0, 0.0, 1.0]);
 
 	gl.uniformMatrix4fv(u_model_view_matrix, false, mvMatrix);
 
+	this.utick += 0.05;
+	var u_tick = gl.getUniformLocation(glProgram, "uTick");
+	gl.uniform1f(u_tick, this.utick);
+	
 	my_grid.drawVertexGrid();
 }
