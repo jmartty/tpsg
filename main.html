@@ -1,25 +1,23 @@
 <html>
     <head>
         <script type="text/javascript" src="gl-matrix-2.2.0.js"></script>
-		<script type="text/javascript" src="main.js"></script>
-        <script id="basic-vs" type="x-shader/x-vertex">
+        <script type="text/javascript" src="main.js"></script>
+        <script id="default-vs" type="x-shader/x-vertex">
             attribute vec3 aVertexPosition;
             attribute vec3 aVertexColor;
 
-			uniform mat4 uModelMatrix;
+            uniform mat4 uModelMatrix;
             uniform mat4 uViewMatrix;
             uniform mat4 uProjectionMatrix;
-			uniform float uTick;
-			
+            
             varying vec4 vColor;
-			
+            
             void main(void) {
-				float z = 15.0*cos(uTick*0.5)*exp(-( pow(aVertexPosition.x-15.0, 2.0)/5.0 + pow(aVertexPosition.y-15.0, 2.0) )/5.0);
-                gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aVertexPosition.xy, z, 1.0);
-                vColor = vec4(aVertexColor.rg, z*0.05+0.5, 1.0);
+                gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aVertexPosition.xyz, 1.0);
+                vColor = vec4(aVertexColor.rgb, 1.0);
             }
         </script>
-        <script id="basic-fs" type="x-shader/x-fragment">
+        <script id="default-fs" type="x-shader/x-fragment">
             precision mediump float;
 
             varying vec4 vColor;
@@ -30,10 +28,10 @@
         </script>
     </head>
     <body onload="main()">
-		<center>
-			<canvas id="my-canvas" width="1280" height="720">
-			Your browser does not support the HTML5 canvas element.
-			</canvas>
-		</center>
+        <center>
+            <canvas id="my-canvas" width="1024" height="576">
+            Your browser does not support the HTML5 canvas element.
+            </canvas>
+        </center>
     </body>
 </html>
