@@ -85,8 +85,11 @@ function ProgramManager() {
             alert("Program `" + program + "` not found!");
             return;
         }
-        gl.useProgram(this.programs[program].program);
-        this.active = this.programs[program].program;
+        // Activar solo si no es el actual
+        if(this.active != this.programs[program].program) {
+            gl.useProgram(this.programs[program].program);
+            this.active = this.programs[program].program;
+        }
     }
 } 
 
@@ -160,14 +163,14 @@ function VertexGrid (_cols, _rows) {
             for (i = 0.0;i < this.cols; i++) { 
                // Para cada vértice definimos su posición
                // como coordenada (x, y, z=0)
-               this.position_buffer.push(i);
+               this.position_buffer.push(5.0*Math.cos(2.0*Math.PI*i/(this.cols-1)));
+               this.position_buffer.push(5.0*Math.sin(2.0*Math.PI*i/(this.cols-1)));
                this.position_buffer.push(j);
-               this.position_buffer.push(0.0);
 
                // Para cada vértice definimos su color
                this.color_buffer.push(i/this.cols);
                this.color_buffer.push(j/this.rows);
-               this.color_buffer.push(1.0);
+               this.color_buffer.push(0.5);
                                       
            };
         };
@@ -205,7 +208,7 @@ function VertexGrid (_cols, _rows) {
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
 
-        gl.drawElements(gl.LINE_STRIP, this.index_buffer.length, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLE_STRIP, this.index_buffer.length, gl.UNSIGNED_SHORT, 0);
 
     }
 }
@@ -216,36 +219,6 @@ function VertexGrid (_cols, _rows) {
 //////////////////////////////////////////////////////////////////////////////
 
 function setupWebGL() {
-    //set the clear color
-    gl.clearColor(0.1, 0.1, 0.2, 1.0);     
-    gl.enable(gl.DEPTH_TEST);                              
-    gl.depthFunc(gl.LEQUAL); 
-    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.viewport(0, 0, canvas.width, canvas.height);
-}
-
-function drawScene() {
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    var u_proj_matrix = gl.getUniformLocation(programManager.active, "uProjectionMatrix");
-    mat4.perspective(pMatrix, Math.PI/4, canvas.width/canvas.height, 0.1, 100.0);
-    gl.uniformMatrix4fv(u_proj_matrix, false, pMatrix);
-
-    var u_view_matrix = gl.getUniformLocation(programManager.active, "uViewMatrix");
-    mat4.lookAt(vMatrix, [25, 25, 25], [0, 0, 0], [0, 0, 1]);
-    gl.uniformMatrix4fv(u_view_matrix, false, vMatrix);
-    
-    var u_model_matrix = gl.getUniformLocation(programManager.active, "uModelMatrix");
-    mat4.identity(mMatrix);
-    mat4.translate(mMatrix, mMatrix, [-15.0, -15.0, 0.0]);
-    //mat4.rotate(mMatrix, mMatrix, Math.sin(tick), [0.0, 0.0, 1.0]);
-    gl.uniformMatrix4fv(u_model_matrix, false, mMatrix);
-    
-    my_grid.drawVertexGrid();
-}
-
-function main() {
-    
     // Setup canvas
     canvas = document.getElementById("my-canvas");  
     try{
@@ -257,8 +230,41 @@ function main() {
     }catch(e){
         alert("Error: canvas.getContext()");
     }
-    // Setup
+    // Other gl settings
+    gl.clearColor(0.1, 0.1, 0.2, 1.0);
+    gl.enable(gl.DEPTH_TEST);                     
+    gl.depthFunc(gl.LESS);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+}
+
+function drawScene() {
+    
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    var u_proj_matrix = gl.getUniformLocation(programManager.active, "uProjectionMatrix");
+    mat4.perspective(pMatrix, Math.PI/4, canvas.width/canvas.height, 0.1, 100.0);
+    gl.uniformMatrix4fv(u_proj_matrix, false, pMatrix);
+
+    var u_view_matrix = gl.getUniformLocation(programManager.active, "uViewMatrix");
+    mat4.lookAt(vMatrix, [35, 35, 35], [0, 0, 0], [0, 0, 1]);
+    gl.uniformMatrix4fv(u_view_matrix, false, vMatrix);
+    
+    var u_model_matrix = gl.getUniformLocation(programManager.active, "uModelMatrix");
+    mat4.identity(mMatrix);
+    //mat4.translate(mMatrix, mMatrix, [-15.0, -15.0, 0.0]);
+    //mat4.rotate(mMatrix, mMatrix, Math.sin(tick), [0.0, 0.0, 1.0]);
+    gl.uniformMatrix4fv(u_model_matrix, false, mMatrix);
+    
+    my_grid.drawVertexGrid();
+    
+}
+
+function main() {
+    
+
+    // Setup webGL and canvas
     setupWebGL();
+    
     // Load shaders and programs
     programManager = new ProgramManager();
     
@@ -268,7 +274,7 @@ function main() {
     programManager.addProgram("default", ["default-vs", "default-fs"]);
     programManager.useProgram("default");
     
-    my_grid = new VertexGrid(20, 20);
+    my_grid = new VertexGrid(20, 10);
     my_grid.createUniformPlaneGrid();
     my_grid.createIndexBuffer();
     my_grid.setupWebGLBuffers();
