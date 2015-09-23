@@ -1,12 +1,15 @@
+//Variables globales
+// Contexto webGL
 var gl = null;
 var canvas = null;
 var programManager = null;
-var mMatrix = mat4.create();
-var pMatrix = mat4.create();
-var vMatrix = mat4.create();
-var my_grid = null;
+// Escena
+var sceneGraph = null;
+var cilinder = null;
 
-function ProgramManager() { 
+// Clase ProgramManager
+// Manejo de shaders y programs
+function ProgramManager() {
     // Attribs
     this.programs = [];
     this.shaders = [];
@@ -14,13 +17,13 @@ function ProgramManager() {
     // Methods
     // Agregar y compilar un shader
     this.addShader = function(shaderid) {
-        
+
         // Verificamos que no exista
         if(shaderid in this.shaders) {
             alert("Shader `" + shaderid + "` already exists!");
             return;
         }
-        
+
         var shaderScript, src, currentChild, shader;
 
         // Obtenemos el elemento <script> que contiene el código fuente del shader
@@ -48,9 +51,9 @@ function ProgramManager() {
         }
         // Cargamos el fuente y compilamos
         gl.shaderSource(shader, src);
-        gl.compileShader(shader);  
+        gl.compileShader(shader);
         // Chequeamos y reportamos si hubo algún error.
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {  
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
             alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader));
             return;
         }
@@ -58,7 +61,7 @@ function ProgramManager() {
         this.shaders[shaderid] = {}
         this.shaders[shaderid].id = shaderid;
         this.shaders[shaderid].shader = shader;
-        
+
     }
     // Agregar y compilar un programa
     this.addProgram = function(programid, shaders) {
@@ -77,7 +80,7 @@ function ProgramManager() {
           alert("Unable to initialize the shader program: " + gl.getProgramInfoLog(this.programs[programid].program));
           return null;
         }
-        
+
     }
     // Activar un programa
     this.useProgram = function(program) {
@@ -91,138 +94,233 @@ function ProgramManager() {
             this.active = this.programs[program].program;
         }
     }
-} 
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-//
-// OBJETO VERTEX-GRID
-// Definimos un constructor para el objeto VertexGrid
-function VertexGrid (_cols, _rows) {
-    if(_cols < 2 || _rows < 2) {
-        alert("Invalid grid size");
-        return null;
+    // Settear matrices de PVM al programa actual
+    // No creo que cambie en ningun momento pero se podria parametrizar
+    this.setProjectionMatrix = function() {
+        var u_proj_matrix = gl.getUniformLocation(this.active, "uProjectionMatrix");
+        var pMatrix = mat4.create();
+        mat4.perspective(pMatrix, Math.PI/4, canvas.width/canvas.height, 0.1, 1000.0);
+        gl.uniformMatrix4fv(u_proj_matrix, false, pMatrix);
     }
-    
-    this.cols = _cols;
-    this.rows = _rows;
-    this.num_vertices = this.cols * this.rows;
 
+    // Debera tomar parametros eventualmente
+    this.setViewMatrix = function() {
+        var u_view_matrix = gl.getUniformLocation(this.active, "uViewMatrix");
+        var vMatrix = mat4.create();
+        mat4.lookAt(vMatrix, [35, 35, 35], [0, 0, 0], [0, 0, 1]);
+        gl.uniformMatrix4fv(u_view_matrix, false, vMatrix);
+    }
+
+    // Lo carga cada modelo
+    this.setModelMatrix = function(mMatrix) {
+        if(mMatrix == null) var mMatrix = mat4.create();
+        var u_model_matrix = gl.getUniformLocation(this.active, "uModelMatrix");
+        gl.uniformMatrix4fv(u_model_matrix, false, mMatrix);
+    }
+}
+
+// Clases para manejo de objetos en forma de grafo
+// Clase especial de raiz del grafo
+function SceneRoot() {
+    // Array de childs
+    this.children = [];
+    // Attach elements to root
+    this.attach = function (o) {
+        this.children.push(o);
+    }
+    // Draw
+    this.draw = function () {
+        // El root no se dibuja, es un nodo especial
+        //console.log("Drawing from root");
+        this.children.forEach(function (child) {
+            child.draw();
+        });
+    }
+}
+
+// Clase para cada elemento (nodo) de la escena
+function SceneNode() {
+
+    this.name = null;
+    this.programid = null;
+    this.children = [];
+    // Model matrix
+    this.mMatrix = mat4.create();
+    // Buffers locales
     this.position_buffer = null;
     this.color_buffer = null;
     this.index_buffer = null;
-    
+    // Buffers GPU
     this.webgl_position_buffer = null;
     this.webgl_color_buffer = null;
     this.webgl_index_buffer = null;
 
-    this.createIndexBuffer = function() {
-        this.index_buffer = [];
-        offset = 0;
-        for(y = 0; y < this.rows-1; y++) {
-            // Degenerate begin: repeat first vertex
-            if (y > 0) {
-                this.index_buffer[offset++] = y * this.cols;
-            }
+    // Metodos
+    // Ctor
+    this.create = function(name, programid) {
+        this.name = name;
+        this.programid = programid;
+    }
+    // Translate
+    this.translate = function(vec) {
+        mat4.translate(this.mMatrix, this.mMatrix, vec);
+    }
+    // Scale
+    this.scale = function(vec) {
+        mat4.scale(this.mMatrix, this.mMatrix, vec);
+    }
+    // Rotate
+    this.rotate = function(angle, axis) {
+        mat4.rotate(this.mMatrix, this.mMatrix, Math.PI*angle/180.0, axis);
+    }
 
-            // Draw one strip
-            for (x = 0; x < this.cols; x++) {
-                this.index_buffer[offset++] = (y * this.cols) + x;
-                this.index_buffer[offset++] = ((y+1) * this.cols) + x;
-            }
+    // Attach children to node
+    this.attach = function (o) {
+        this.children.push(o);
+    }
 
-            // Degenerate end: repeat last vertex
-            if (y < this.rows-2) {
-                this.index_buffer[offset++] = ((y+1) * this.cols) + this.cols-1;
-            }
+    // These methods need to be overriden when deriving from this class
+    // Local buffer setup
+    this.setupModelData = function() {
+        // Definir para cada nodo/elemento
+        alert("No model vertex defined for " + this.name);
+    }
+    // Local buffer setup
+    this.setupIndexBuffer = function() {
+        // Definir para cada nodo/elemento
+        alert("No index buffer defined for " + this.name);
+    }
+    // Local buffer setup
+    this.setupGLBuffers = function() {
+        // Definir para cada nodo/elemento
+        alert("No GL buffers defined for " + this.name);
+    }
+
+    // Shader, buffer and attr setup
+    this.setupShaders = function() {
+        // Enable shader program
+        programManager.useProgram(this.programid);
+        // Setup uniforms
+        programManager.setProjectionMatrix();
+        programManager.setViewMatrix();
+        programManager.setModelMatrix(this.mMatrix);
+        // Enable each attribute (if gl buffer is set)
+        // Position
+        if(this.webgl_position_buffer) {
+            var vertexPositionAttribute = gl.getAttribLocation(programManager.active, "aVertexPosition");
+            gl.enableVertexAttribArray(vertexPositionAttribute);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_position_buffer);
+            gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+        }else{
+            alert("No GL position buffer set for " + this.name);
         }
-        //console.log(this.index_buffer);
-    }
-    
-    // Esta función inicializa el position_buffer y el color buffer de forma de 
-    // crear un plano de color gris que se extiende sobre el plano XY, con Z=0
-    // El plano se genera centrado en el origen.
-    // El propósito de esta función es a modo de ejemplo de como inicializar y cargar
-    // los buffers de las posiciones y el color para cada vértice.
-    this.createUniformPlaneGrid = function() {
-
-        this.position_buffer = [];
-        this.color_buffer = [];
-
-        
-        for (j = 0.0;j < this.rows; j++) {
-            for (i = 0.0;i < this.cols; i++) { 
-               // Para cada vértice definimos su posición
-               // como coordenada (x, y, z=0)
-               this.position_buffer.push(5.0*Math.cos(2.0*Math.PI*i/(this.cols-1)));
-               this.position_buffer.push(5.0*Math.sin(2.0*Math.PI*i/(this.cols-1)));
-               this.position_buffer.push(j);
-
-               // Para cada vértice definimos su color
-               this.color_buffer.push(i/this.cols);
-               this.color_buffer.push(j/this.rows);
-               this.color_buffer.push(0.5);
-                                      
-           };
-        };
-        //console.log(this.position_buffer);
+        // Color
+        if(this.webgl_color_buffer) {
+            var vertexColorAttribute = gl.getAttribLocation(programManager.active, "aVertexColor");
+            gl.enableVertexAttribArray(vertexColorAttribute);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_color_buffer);
+            gl.vertexAttribPointer(vertexColorAttribute, 3, gl.FLOAT, false, 0, 0);
+        }else{
+            alert("No GL color buffer set for " + this.name);
+        }
+        // Indices
+        if(this.webgl_index_buffer) {
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
+        }else{
+            alert("No GL index buffer set for " + this.name);
+        }
     }
 
-    // Esta función crea e incializa los buffers dentro del pipeline para luego
-    // utlizarlos a la hora de renderizar.
-    this.setupWebGLBuffers = function() {
-
-        this.webgl_position_buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_position_buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.position_buffer), gl.STATIC_DRAW);
-
-        this.webgl_color_buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_color_buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.color_buffer), gl.STATIC_DRAW);   
-
-        this.webgl_index_buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.index_buffer), gl.STATIC_DRAW);
-    }
-
-    this.drawVertexGrid = function() {
-
-        var vertexPositionAttribute = gl.getAttribLocation(programManager.active, "aVertexPosition");
-        gl.enableVertexAttribArray(vertexPositionAttribute);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_position_buffer);
-        gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-
-        var vertexColorAttribute = gl.getAttribLocation(programManager.active, "aVertexColor");
-        gl.enableVertexAttribArray(vertexColorAttribute);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_color_buffer);
-        gl.vertexAttribPointer(vertexColorAttribute, 3, gl.FLOAT, false, 0, 0);
-
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
-
+    // Draw node and children
+    this.draw = function () {
+        // Draw self
+        //console.log("Drawing " + this.name);
+        // Setup shaders, buffers and attributes
+        this.setupShaders();
+        // Draw self
         gl.drawElements(gl.TRIANGLE_STRIP, this.index_buffer.length, gl.UNSIGNED_SHORT, 0);
-
+        // Delegate draw each child
+        this.children.forEach(function (child) {
+            child.draw();
+        });
     }
 }
-//
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
 
+// Clases de objetos a dibujar (derivadas de sceneNode)
+// Cilindro
+Cilinder = function() { }
+Cilinder.prototype = new SceneNode()
+
+Cilinder.prototype.setupModelData = function() {
+    this.cols = 20;
+    this.rows = 20;
+    this.position_buffer = [];
+    this.color_buffer = [];
+
+    for (j = 0.0;j < this.rows; j++) {
+        for (i = 0.0;i < this.cols; i++) {
+           // Para cada vértice definimos su posición
+           // Cilindro
+           this.position_buffer.push(5.0*Math.cos(2.0*Math.PI*i/(this.cols-1)));
+           this.position_buffer.push(5.0*Math.sin(2.0*Math.PI*i/(this.cols-1)));
+           this.position_buffer.push(j);
+           // Plano
+           //this.position_buffer.push(i);
+           //this.position_buffer.push(j);
+           //this.position.buffer.push(0.0);
+
+           // Para cada vértice definimos su color
+           this.color_buffer.push(i/this.cols);
+           this.color_buffer.push(j/this.rows);
+           this.color_buffer.push(0.5);
+
+       };
+    };
+}
+
+Cilinder.prototype.setupIndexBuffer = function() {
+    this.index_buffer = [];
+    offset = 0;
+    for(y = 0; y < this.rows-1; y++) {
+        // Degenerate begin: repeat first vertex
+        if (y > 0) {
+            this.index_buffer[offset++] = y * this.cols;
+        }
+
+        // Draw one strip
+        for (x = 0; x < this.cols; x++) {
+            this.index_buffer[offset++] = (y * this.cols) + x;
+            this.index_buffer[offset++] = ((y+1) * this.cols) + x;
+        }
+
+        // Degenerate end: repeat last vertex
+        if (y < this.rows-2) {
+            this.index_buffer[offset++] = ((y+1) * this.cols) + this.cols-1;
+        }
+    }
+}
+
+Cilinder.prototype.setupGLBuffers = function() {
+    this.webgl_position_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_position_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.position_buffer), gl.STATIC_DRAW);
+
+    this.webgl_color_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_color_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.color_buffer), gl.STATIC_DRAW);
+
+    this.webgl_index_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.index_buffer), gl.STATIC_DRAW);
+}
+
+// Funcion para inicializar el contexto webGL
 function setupWebGL() {
     // Setup canvas
-    canvas = document.getElementById("my-canvas");  
+    canvas = document.getElementById("my-canvas");
     try{
-        gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");                    
+        gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
         if(!gl) {
             alert("Error: Your browser does not appear to support WebGL.");
             return;
@@ -232,55 +330,47 @@ function setupWebGL() {
     }
     // Other gl settings
     gl.clearColor(0.1, 0.1, 0.2, 1.0);
-    gl.enable(gl.DEPTH_TEST);                     
+    gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LESS);
     gl.viewport(0, 0, canvas.width, canvas.height);
 }
 
+// Funcion general de dibujado
 function drawScene() {
-    
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    var u_proj_matrix = gl.getUniformLocation(programManager.active, "uProjectionMatrix");
-    mat4.perspective(pMatrix, Math.PI/4, canvas.width/canvas.height, 0.1, 100.0);
-    gl.uniformMatrix4fv(u_proj_matrix, false, pMatrix);
-
-    var u_view_matrix = gl.getUniformLocation(programManager.active, "uViewMatrix");
-    mat4.lookAt(vMatrix, [35, 35, 35], [0, 0, 0], [0, 0, 1]);
-    gl.uniformMatrix4fv(u_view_matrix, false, vMatrix);
-    
-    var u_model_matrix = gl.getUniformLocation(programManager.active, "uModelMatrix");
-    mat4.identity(mMatrix);
-    //mat4.translate(mMatrix, mMatrix, [-15.0, -15.0, 0.0]);
-    //mat4.rotate(mMatrix, mMatrix, Math.sin(tick), [0.0, 0.0, 1.0]);
-    gl.uniformMatrix4fv(u_model_matrix, false, mMatrix);
-    
-    my_grid.drawVertexGrid();
-    
+    cilinder.rotate(1.0, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
+    sceneRoot.draw();
 }
 
 function main() {
-    
-
     // Setup webGL and canvas
     setupWebGL();
-    
     // Load shaders and programs
     programManager = new ProgramManager();
-    
+    // Add shaders from <script>
     programManager.addShader("default-vs");
     programManager.addShader("default-fs");
-    
+    // Create programs with shaders
     programManager.addProgram("default", ["default-vs", "default-fs"]);
+    // Enable default program
     programManager.useProgram("default");
-    
-    my_grid = new VertexGrid(20, 10);
-    my_grid.createUniformPlaneGrid();
-    my_grid.createIndexBuffer();
-    my_grid.setupWebGLBuffers();
-    
-    drawScene();
-    //setInterval(drawScene, 16);  
+
+    // Setup de la escena
+    sceneRoot = new SceneRoot();
+
+    // Creacion de instancias de modelos
+    cilinder = new Cilinder();
+    cilinder.create("cilinder", "default");
+    cilinder.setupModelData();
+    cilinder.setupIndexBuffer();
+    cilinder.setupGLBuffers();
+
+    // Construimos la escena
+    sceneRoot.attach(cilinder);
+
+    // Draw
+    //drawScene();
+    setInterval(drawScene, 16);
 
 }
 

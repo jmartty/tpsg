@@ -9,9 +9,9 @@
             uniform mat4 uModelMatrix;
             uniform mat4 uViewMatrix;
             uniform mat4 uProjectionMatrix;
-            
+
             varying vec4 vColor;
-            
+
             void main(void) {
                 gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aVertexPosition.xyz, 1.0);
                 vColor = vec4(aVertexColor.rgb, 1.0);
@@ -32,6 +32,10 @@
             <canvas id="my-canvas" width="1024" height="576">
             Your browser does not support the HTML5 canvas element.
             </canvas>
+            <br><br>
+            X <input id="x" type="range" min="0.0" max="1.0" value="0.0" step="0.01"><br>
+            Y <input id="y" type="range" min="0.0" max="1.0" value="0.0" step="0.01"><br>
+            Z <input id="z" type="range" min="0.0" max="1.0" value="0.0" step="0.01"><br>
         </center>
     </body>
 </html>
