@@ -3,9 +3,6 @@
 var gl = null;
 var canvas = null;
 var programManager = null;
-// Escena
-var sceneGraph = null;
-var cilinder = null;
 
 // Clase ProgramManager
 // Manejo de shaders y programs
@@ -134,6 +131,7 @@ function SceneRoot() {
         // El root no se dibuja, es un nodo especial
         //console.log("Drawing from root");
         this.children.forEach(function (child) {
+
             child.draw();
         });
     }
@@ -144,9 +142,9 @@ function SceneNode() {
 
     this.name = null;
     this.programid = null;
-    this.children = [];
+    this.children = null;
     // Model matrix
-    this.mMatrix = mat4.create();
+    this.mMatrix = null;
     // Buffers locales
     this.position_buffer = null;
     this.color_buffer = null;
@@ -161,6 +159,8 @@ function SceneNode() {
     this.create = function(name, programid) {
         this.name = name;
         this.programid = programid;
+        this.mMatrix = mat4.create();
+        this.children = [];
     }
     // Translate
     this.translate = function(vec) {
@@ -198,13 +198,19 @@ function SceneNode() {
     }
 
     // Shader, buffer and attr setup
-    this.setupShaders = function() {
+    this.setupShaders = function(parentModelMatrix) {
         // Enable shader program
         programManager.useProgram(this.programid);
         // Setup uniforms
         programManager.setProjectionMatrix();
         programManager.setViewMatrix();
-        programManager.setModelMatrix(this.mMatrix);
+        if(parentModelMatrix) {
+            var chainedModelMatrix = mat4.create();
+            mat4.mul(chainedModelMatrix, parentModelMatrix, this.mMatrix);
+            programManager.setModelMatrix(chainedModelMatrix);
+        }else{
+            programManager.setModelMatrix(this.mMatrix);
+        }
         // Enable each attribute (if gl buffer is set)
         // Position
         if(this.webgl_position_buffer) {
@@ -233,25 +239,25 @@ function SceneNode() {
     }
 
     // Draw node and children
-    this.draw = function () {
+    this.draw = function (parentModelMatrix) {
         // Draw self
         //console.log("Drawing " + this.name);
         // Setup shaders, buffers and attributes
-        this.setupShaders();
+        this.setupShaders(parentModelMatrix);
         // Draw self
         gl.drawElements(gl.TRIANGLE_STRIP, this.index_buffer.length, gl.UNSIGNED_SHORT, 0);
         // Delegate draw each child
         this.children.forEach(function (child) {
-            child.draw();
-        });
+            child.draw(this.mMatrix);
+        }, this);
     }
 }
 
 // Clases de objetos a dibujar (derivadas de sceneNode)
 // Cilindro
 Cilinder = function() { }
-Cilinder.prototype = new SceneNode()
-
+Cilinder.prototype = new SceneNode();
+// Redefinimos los metodos de datos propios de la figura
 Cilinder.prototype.setupModelData = function() {
     this.cols = 20;
     this.rows = 20;
@@ -335,12 +341,10 @@ function setupWebGL() {
     gl.viewport(0, 0, canvas.width, canvas.height);
 }
 
-// Funcion general de dibujado
-function drawScene() {
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    cilinder.rotate(1.0, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
-    sceneRoot.draw();
-}
+// Escena
+var sceneGraph = null;
+var cilinder = null;
+var cilinder2 = null;
 
 function main() {
     // Setup webGL and canvas
@@ -365,8 +369,18 @@ function main() {
     cilinder.setupIndexBuffer();
     cilinder.setupGLBuffers();
 
+    cilinder2 = new Cilinder();
+    cilinder2.create("cilinder2", "default");
+    cilinder2.setupModelData();
+    cilinder2.setupIndexBuffer();
+    cilinder2.setupGLBuffers();
+
     // Construimos la escena
     sceneRoot.attach(cilinder);
+    cilinder.attach(cilinder2);
+    cilinder2.scale([0.5, 0.5, 0.5]);
+    cilinder2.rotate(90, [0.0, 1.0, 0.0]);
+    cilinder2.translate([-20.0, 0.0, 0.0]);
 
     // Draw
     //drawScene();
@@ -374,3 +388,9 @@ function main() {
 
 }
 
+// Funcion general de dibujado
+function drawScene() {
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    cilinder.rotate(1.0, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
+    sceneRoot.draw();
+}
