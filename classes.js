@@ -99,7 +99,7 @@ function ProgramManager() {
     this.setViewMatrix = function() {
         var u_view_matrix = gl.getUniformLocation(this.active, "uViewMatrix");
         var vMatrix = mat4.create();
-        mat4.lookAt(vMatrix, [35, 35, 35], [0, 0, 0], [0, 0, 1]);
+        mat4.lookAt(vMatrix, [3, 3, 3], [0, 0, 0], [0, 0, 1]);
         gl.uniformMatrix4fv(u_view_matrix, false, vMatrix);
     }
 
@@ -202,8 +202,21 @@ function SceneNode() {
     }
     // Local buffer setup
     this.setupGLBuffers = function() {
-        // Definir para cada nodo/elemento
-        alert("No GL buffers defined for " + this.name);
+		if(this.position_buffer) {
+			this.webgl_position_buffer = gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_position_buffer);
+			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.position_buffer), gl.STATIC_DRAW);
+		}
+		if(this.color_buffer) {
+			this.webgl_color_buffer = gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_color_buffer);
+			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.color_buffer), gl.STATIC_DRAW);
+		}
+		if(this.index_buffer) {
+			this.webgl_index_buffer = gl.createBuffer();
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
+			gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.index_buffer), gl.STATIC_DRAW);
+		}
     }
 
     // Shader, buffer and attr setup
@@ -257,27 +270,23 @@ function SceneNode() {
 }
 
 // Clases de objetos a dibujar (derivadas de sceneNode)
-// Cilindro
-Cylinder = function() { }
-Cylinder.prototype = new SceneNode();
-// Redefinimos los metodos de datos propios de la figura
-Cylinder.prototype.setupModelData = function() {
-    this.cols = 20;
-    this.rows = 20;
+Grid = function() { }
+Grid.prototype = new SceneNode();
+
+Grid.prototype.setupModelData = function(cols, rows) {
+	this.cols = cols;
+    this.rows = rows;
+
     this.position_buffer = [];
     this.color_buffer = [];
 
     for (j = 0.0;j < this.rows; j++) {
         for (i = 0.0;i < this.cols; i++) {
            // Para cada vértice definimos su posición
-           // Cilindro
-           this.position_buffer.push(5.0*Math.cos(2.0*Math.PI*i/(this.cols-1)));
-           this.position_buffer.push(5.0*Math.sin(2.0*Math.PI*i/(this.cols-1)));
-           this.position_buffer.push(j);
            // Plano
-           //this.position_buffer.push(i);
-           //this.position_buffer.push(j);
-           //this.position.buffer.push(0.0);
+           this.position_buffer.push(i/this.cols);
+           this.position_buffer.push(j/this.rows);
+           this.position_buffer.push(0.0);
 
            // Para cada vértice definimos su color
            this.color_buffer.push(i/this.cols);
@@ -288,7 +297,7 @@ Cylinder.prototype.setupModelData = function() {
     };
 }
 
-Cylinder.prototype.setupIndexBuffer = function() {
+Grid.prototype.setupIndexBuffer = function() {
     this.index_buffer = [];
     offset = 0;
     for(y = 0; y < this.rows-1; y++) {
@@ -310,16 +319,30 @@ Cylinder.prototype.setupIndexBuffer = function() {
     }
 }
 
-Cylinder.prototype.setupGLBuffers = function() {
-    this.webgl_position_buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_position_buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.position_buffer), gl.STATIC_DRAW);
+// Cilindro
+Cylinder = function() { }
+Cylinder.prototype = new Grid();
+// Redefinimos los metodos de datos propios de la figura
+Cylinder.prototype.setupModelData = function(cols, rows) {
+	this.cols = cols;
+    this.rows = rows;
 
-    this.webgl_color_buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_color_buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.color_buffer), gl.STATIC_DRAW);
+    this.position_buffer = [];
+    this.color_buffer = [];
 
-    this.webgl_index_buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.index_buffer), gl.STATIC_DRAW);
+    for (j = 0.0;j < this.rows; j++) {
+        for (i = 0.0;i < this.cols; i++) {
+           // Para cada vértice definimos su posición
+           // Cilindro
+           this.position_buffer.push(0.5*Math.cos(2.0*Math.PI*i/(this.cols-1)));
+           this.position_buffer.push(0.5*Math.sin(2.0*Math.PI*i/(this.cols-1)));
+           this.position_buffer.push(j/this.rows);
+
+           // Para cada vértice definimos su color
+           this.color_buffer.push(i/this.cols);
+           this.color_buffer.push(j/this.rows);
+           this.color_buffer.push(0.5);
+
+       };
+    };
 }

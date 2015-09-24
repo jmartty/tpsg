@@ -48,22 +48,30 @@ function main() {
     // Creacion de instancias de modelos
     cylinder = new Cylinder();
     cylinder.create("cylinder", "default");
-    cylinder.setupModelData();
+    cylinder.setupModelData(20, 10);
     cylinder.setupIndexBuffer();
     cylinder.setupGLBuffers();
 
     cylinder2 = new Cylinder();
     cylinder2.create("cylinder2", "default");
-    cylinder2.setupModelData();
+    cylinder2.setupModelData(20, 10);
     cylinder2.setupIndexBuffer();
     cylinder2.setupGLBuffers();
 
+	grid = new Grid();
+	grid.create("grid", "default");
+	grid.setupModelData(10, 10);
+	grid.setupIndexBuffer();
+	grid.setupGLBuffers();
+	
     // Construimos la escena
     sceneRoot.attach(cylinder);
     cylinder.attach(cylinder2);
+	cylinder.attach(grid);
+	grid.translate([-0.5, -0.5, 0.0]);
     cylinder2.scale([0.5, 0.5, 0.5]);
     cylinder2.rotate(90, [0.0, 1.0, 0.0]);
-    cylinder2.translate([-20.0, 0.0, 0.0]);
+    cylinder2.translate([-1.0, 0.0, 0.5]);
 
     // Draw
     //drawScene();

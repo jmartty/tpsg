@@ -34,9 +34,9 @@
             Your browser does not support the HTML5 canvas element.
             </canvas>
             <br><br>
-            X <input id="x" type="range" min="0.0" max="1.0" value="0.0" step="0.01"><br>
-            Y <input id="y" type="range" min="0.0" max="1.0" value="0.0" step="0.01"><br>
-            Z <input id="z" type="range" min="0.0" max="1.0" value="0.0" step="0.01"><br>
+            X <input ondblclick="this.value=0.0" id="x" type="range" min="-1.0" max="1.0" value="0.0" step="0.1"><br>
+            Y <input ondblclick="this.value=0.0" id="y" type="range" min="-1.0" max="1.0" value="0.0" step="0.1"><br>
+            Z <input ondblclick="this.value=0.0" id="z" type="range" min="-1.0" max="1.0" value="0.0" step="0.1"><br>
         </center>
     </body>
 </html>
