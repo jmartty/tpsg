@@ -58,17 +58,17 @@ function main() {
     cylinder2.setupIndexBuffer();
     cylinder2.setupGLBuffers();
 
-	grid = new Grid();
-	grid.create("grid", "default");
-	grid.setupModelData(10, 10);
-	grid.setupIndexBuffer();
-	grid.setupGLBuffers();
-	
+    grid = new Grid();
+    grid.create("grid", "default");
+    grid.setupModelData(10, 10);
+    grid.setupIndexBuffer();
+    grid.setupGLBuffers();
+    
     // Construimos la escena
     sceneRoot.attach(cylinder);
     cylinder.attach(cylinder2);
-	cylinder.attach(grid);
-	grid.translate([-0.5, -0.5, 0.0]);
+    cylinder.attach(grid);
+    grid.translate([-0.5, -0.5, 0.0]);
     cylinder2.scale([0.5, 0.5, 0.5]);
     cylinder2.rotate(90, [0.0, 1.0, 0.0]);
     cylinder2.translate([-1.0, 0.0, 0.5]);

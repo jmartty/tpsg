@@ -118,13 +118,13 @@ function SceneRoot() {
     this.children = [];
     // Attach elements to root
     this.attach = function (o) {
-		o.parent = this;
+        o.parent = this;
         this.children.push(o);
     }
-	// Identity via null
-	this.getModelMatrix = function() {
-		return null;
-	}
+    // Identity via null
+    this.getModelMatrix = function() {
+        return null;
+    }
     // Draw
     this.draw = function () {
         // El root no se dibuja, es un nodo especial
@@ -141,7 +141,7 @@ function SceneNode() {
     this.name = null;
     this.programid = null;
     this.children = null;
-	this.parent = null;
+    this.parent = null;
     // Model matrix
     this.mMatrix = null;
     // Buffers locales
@@ -176,19 +176,19 @@ function SceneNode() {
 
     // Attach children to node
     this.attach = function(o) {
-		o.parent = this;
+        o.parent = this;
         this.children.push(o);
     }
 
-	// Get model matrix multiplied with the parents recursively
-	this.getModelMatrix = function() {
-		var tmpMat = mat4.clone(this.mMatrix);
-		if (this.parent.getModelMatrix() != null) {
-			mat4.multiply(tmpMat, this.parent.getModelMatrix(), tmpMat);
-		}
-		return tmpMat;
-	}
-	
+    // Get model matrix multiplied with the parents recursively
+    this.getModelMatrix = function() {
+        var tmpMat = mat4.clone(this.mMatrix);
+        if (this.parent.getModelMatrix() != null) {
+            mat4.multiply(tmpMat, this.parent.getModelMatrix(), tmpMat);
+        }
+        return tmpMat;
+    }
+    
     // These methods need to be overriden when deriving from this class
     // Local buffer setup
     this.setupModelData = function() {
@@ -202,21 +202,21 @@ function SceneNode() {
     }
     // Local buffer setup
     this.setupGLBuffers = function() {
-		if(this.position_buffer) {
-			this.webgl_position_buffer = gl.createBuffer();
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_position_buffer);
-			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.position_buffer), gl.STATIC_DRAW);
-		}
-		if(this.color_buffer) {
-			this.webgl_color_buffer = gl.createBuffer();
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_color_buffer);
-			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.color_buffer), gl.STATIC_DRAW);
-		}
-		if(this.index_buffer) {
-			this.webgl_index_buffer = gl.createBuffer();
-			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
-			gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.index_buffer), gl.STATIC_DRAW);
-		}
+        if(this.position_buffer) {
+            this.webgl_position_buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_position_buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.position_buffer), gl.STATIC_DRAW);
+        }
+        if(this.color_buffer) {
+            this.webgl_color_buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_color_buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.color_buffer), gl.STATIC_DRAW);
+        }
+        if(this.index_buffer) {
+            this.webgl_index_buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.index_buffer), gl.STATIC_DRAW);
+        }
     }
 
     // Shader, buffer and attr setup
@@ -274,7 +274,7 @@ Grid = function() { }
 Grid.prototype = new SceneNode();
 
 Grid.prototype.setupModelData = function(cols, rows) {
-	this.cols = cols;
+    this.cols = cols;
     this.rows = rows;
 
     this.position_buffer = [];
@@ -324,7 +324,7 @@ Cylinder = function() { }
 Cylinder.prototype = new Grid();
 // Redefinimos los metodos de datos propios de la figura
 Cylinder.prototype.setupModelData = function(cols, rows) {
-	this.cols = cols;
+    this.cols = cols;
     this.rows = rows;
 
     this.position_buffer = [];
