@@ -117,7 +117,7 @@ function SceneRoot() {
     // Array de childs
     this.children = [];
     // Attach elements to root
-    this.attach = function (o) {
+    this.attachChild = function (o) {
         o.parent = this;
         this.children.push(o);
     }
@@ -175,7 +175,7 @@ function SceneNode() {
     }
 
     // Attach children to node
-    this.attach = function(o) {
+    this.attachChild = function(o) {
         o.parent = this;
         this.children.push(o);
     }

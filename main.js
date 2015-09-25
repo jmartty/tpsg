@@ -65,9 +65,9 @@ function main() {
     grid.setupGLBuffers();
     
     // Construimos la escena
-    sceneRoot.attach(cylinder);
-    cylinder.attach(cylinder2);
-    cylinder.attach(grid);
+    sceneRoot.attachChild(cylinder);
+    cylinder.attachChild(cylinder2);
+    cylinder.attachChild(grid);
     grid.translate([-0.5, -0.5, 0.0]);
     cylinder2.scale([0.5, 0.5, 0.5]);
     cylinder2.rotate(90, [0.0, 1.0, 0.0]);
