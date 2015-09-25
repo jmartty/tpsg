@@ -15,22 +15,17 @@ function ProgramManager() {
             return;
         }
 
-        var shaderScript, src, currentChild, shader;
+        var shaderScript, src, shader;
 
         // Obtenemos el elemento <script> que contiene el código fuente del shader
         shaderScript = document.getElementById(shaderid);
         if(!shaderScript) {
             alert("Elem `" + shaderid + "` not found");
-            return null;
+            return;
         }
         // Extraemos el contenido de texto del <script>
-        src = "";
-        currentChild = shaderScript.firstChild;
-        while(currentChild) {
-            if (currentChild.nodeType == currentChild.TEXT_NODE)
-                src += currentChild.textContent;
-            currentChild = currentChild.nextSibling;
-        }
+        src = shaderScript.text;
+
         // Creamos un shader WebGL según el atributo type del <script>
         if(shaderScript.type == "x-shader/x-fragment") {
             shader = gl.createShader(gl.FRAGMENT_SHADER);
