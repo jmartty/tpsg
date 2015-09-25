@@ -75,7 +75,7 @@ function main() {
 
     // Draw
     //drawScene();
-    setInterval(drawScene, 16);
+    requestAnimationFrame(drawScene);
 
 }
 
@@ -87,4 +87,5 @@ function drawScene() {
     cylinder.translate([0.0, 1.5, 0.0]);
     cylinder.rotate(-document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
     sceneRoot.draw();
+    requestAnimationFrame(drawScene);
 }
