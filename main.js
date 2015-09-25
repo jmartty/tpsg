@@ -82,6 +82,9 @@ function main() {
 // Funcion general de dibujado
 function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    cylinder.rotate(1.0, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
+    cylinder.reset();
+    cylinder.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
+    cylinder.translate([0.0, 1.5, 0.0]);
+    cylinder.rotate(-document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
     sceneRoot.draw();
 }

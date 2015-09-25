@@ -173,6 +173,10 @@ function SceneNode() {
     this.rotate = function(angle, axis) {
         mat4.rotate(this.mMatrix, this.mMatrix, Math.PI*angle/180.0, axis);
     }
+    // Reset model matrix to identity
+    this.reset = function() {
+        this.mMatrix = mat4.create();
+    }
 
     // Attach children to node
     this.attachChild = function(o) {
