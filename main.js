@@ -46,15 +46,39 @@ function main() {
     // Creacion de instancias de modelos
     es = new ExtrusionSurface();
     es.create("es", "default");
-    es.setupModelData([[1, 1], [-1, 1], [-1, -1], [1, -1]], function(u){ return [u, 0, 0]; }, function(u){ return [1, 0, 0]; }, 9); // Revisar por que no anda
+    es.setupModelData([[0.1, 0.1], [-0.1, 0.1], [-0.1, -0.1], [0.1, -0.1]],
+                      function(u){ return [2*u, Math.sin(u*Math.PI*2), 0]; },
+                      function(u){ return [2, Math.cos(u*Math.PI*2), 0]; },
+                      100);
     //es.draw_mode = gl.LINE_STRIP;
     es.setupIndexBuffer();
     es.setupGLBuffers();
-
     
     // Construimos la escena
     sceneRoot.attachChild(es);
 
+    // Dibujamos los ejes
+    axis_x = new Curve();
+    axis_x.create("x", "default");
+    axis_x.setupModelData(function(u){ return [u, 0, 0]; }, 2);
+    axis_x.setupIndexBuffer();
+    axis_x.setupGLBuffers();
+    sceneRoot.attachChild(axis_x);
+
+    axis_y = new Curve();
+    axis_y.create("y", "default");
+    axis_y.setupModelData(function(u){ return [0, u, 0]; }, 2);
+    axis_y.setupIndexBuffer();
+    axis_y.setupGLBuffers();
+    sceneRoot.attachChild(axis_y);
+    
+    axis_z = new Curve();
+    axis_z.create("z", "default");
+    axis_z.setupModelData(function(u){ return [0, 0, u]; }, 2);
+    axis_z.setupIndexBuffer();
+    axis_z.setupGLBuffers();
+    sceneRoot.attachChild(axis_z);
+    
     // Draw
     //drawScene();
     requestAnimationFrame(drawScene);

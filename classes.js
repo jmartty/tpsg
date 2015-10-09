@@ -371,12 +371,10 @@ ExtrusionSurface.prototype.setupModelData = function(cutVerts, curve, curveD, st
     
     var localMat = mat4.create();
     
-    for (j = 0.0;j <= 1.0; j += 1.0/(steps-1.0)) {
+    for (j = 0.0;j < steps;j++) {
         
-        if(j > 1) j = 1;
-        
-        var pos = curve(j);
-        var tg = curveD(j);
+        var pos = curve(j/(steps-1));
+        var tg = curveD(j/(steps-1));
         
         vec3.normalize(tg, tg);
         var up = [0, 0, 1];
@@ -402,12 +400,41 @@ ExtrusionSurface.prototype.setupModelData = function(cutVerts, curve, curveD, st
             this.position_buffer = this.position_buffer.concat(vec);
 
             // Para cada vértice definimos su color
-            this.color_buffer.push(i/this.cols);
-            this.color_buffer.push(j/this.rows);
+            this.color_buffer.push(i/(this.cols-1));
+            this.color_buffer.push(j/(this.rows-1));
             this.color_buffer.push(0.5);
 
-       };
-    };
+       }
+    }
+}
+
+// Curva
+Curve = function() { }
+Curve.prototype = new SceneNode();
+// cutVerts = array of vertices (2d) in the XY plane definining the cut
+// curve = f(u), R->R^3
+// curveD = f'(u), derivative of f(u)
+// steps = number of divisions of paramter to u
+Curve.prototype.setupModelData = function(curve, steps) {
+    this.steps = steps;
+    this.draw_mode = gl.LINE_STRIP;
+    
+    this.position_buffer = [];
+    this.color_buffer = [];
+    
+    for (j = 0.0;j < steps;j++) {
+        var pos = curve(j/(steps-1));
+        this.position_buffer = this.position_buffer.concat(pos);
+        this.color_buffer = this.color_buffer.concat([0.0, 1.0, 0.0]);
+    }
+}
+
+Curve.prototype.setupIndexBuffer = function() {
+    this.index_buffer = [];
+
+    for(i = 0; i < this.steps; i++) {
+        this.index_buffer.push(i);
+    }
 }
 
 // Circle uses center + TRIANGLE_FAN 
