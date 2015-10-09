@@ -26,8 +26,6 @@ function setupWebGL() {
 
 // Escena
 var sceneGraph = null;
-var cilinder = null;
-var cilinder2 = null;
 
 function main() {
     // Setup webGL and canvas
@@ -46,22 +44,16 @@ function main() {
     sceneRoot = new SceneRoot();
 
     // Creacion de instancias de modelos
-    cone = new SurfaceOfRevolution();
-    cone.create("rs", "default");
-    cone.setupModelData(10, 15, function(u){ return u; });
-    cone.setupIndexBuffer();
-    cone.setupGLBuffers();
-    
-    top_cap = new Circle();
-    top_cap.create("circle", "default");
-    top_cap.setupModelData(10);
-    top_cap.setupIndexBuffer();
-    top_cap.setupGLBuffers();
-    top_cap.translate([0.0, 0.0, 1.0]);
+    es = new ExtrusionSurface();
+    es.create("es", "default");
+    es.setupModelData([[1, 1], [-1, 1], [-1, -1], [1, -1]], function(u){ return [u, 0, 0]; }, function(u){ return [1, 0, 0]; }, 9); // Revisar por que no anda
+    //es.draw_mode = gl.LINE_STRIP;
+    es.setupIndexBuffer();
+    es.setupGLBuffers();
+
     
     // Construimos la escena
-    sceneRoot.attachChild(cone);
-    cone.attachChild(top_cap);
+    sceneRoot.attachChild(es);
 
     // Draw
     //drawScene();
@@ -73,7 +65,7 @@ function main() {
 function drawScene() {
     requestAnimationFrame(drawScene);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    cone.reset();
-    cone.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
+    es.reset();
+    es.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
     sceneRoot.draw();
 }

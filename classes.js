@@ -272,6 +272,9 @@ function SceneNode() {
 }
 
 // Clases de objetos a dibujar (derivadas de sceneNode)
+// Grilla de cols*rows
+// cols = divisiones de cada corte
+// rows = # extrusion steps
 Grid = function() { }
 Grid.prototype = new SceneNode();
 
@@ -321,7 +324,93 @@ Grid.prototype.setupIndexBuffer = function() {
     }
 }
 
-// Circle = fan grid
+// Cilindro
+Cylinder = function() { }
+Cylinder.prototype = new Grid();
+// Redefinimos los metodos de datos propios de la figura
+Cylinder.prototype.setupModelData = function(cols, rows) {
+    this.cols = cols;
+    this.rows = rows;
+
+    this.position_buffer = [];
+    this.color_buffer = [];
+
+    for (j = 0.0;j < this.rows; j++) {
+        for (i = 0.0;i < this.cols; i++) {
+            // Para cada vértice definimos su posición
+            // Cilindro
+            this.position_buffer.push(0.5*Math.cos(2.0*Math.PI*i/(this.cols-1)));
+            this.position_buffer.push(0.5*Math.sin(2.0*Math.PI*i/(this.cols-1)));
+            this.position_buffer.push(j/(this.rows-1));
+
+            // Para cada vértice definimos su color
+            this.color_buffer.push(i/this.cols);
+            this.color_buffer.push(j/this.rows);
+            this.color_buffer.push(0.5);
+
+       };
+    };
+}
+
+// Cilindro
+ExtrusionSurface = function() { }
+ExtrusionSurface.prototype = new Grid();
+// cutVerts = array of vertices (2d) in the XY plane definining the cut
+// curve = f(u), R->R^3
+// curveD = f'(u), derivative of f(u)
+// steps = number of divisions of paramter to u
+ExtrusionSurface.prototype.setupModelData = function(cutVerts, curve, curveD, steps) {
+    // Connect last with first
+    cutVerts.push(cutVerts[0]);
+    
+    this.cols = cutVerts.length;
+    this.rows = steps;
+
+    this.position_buffer = [];
+    this.color_buffer = [];
+    
+    var localMat = mat4.create();
+    
+    for (j = 0.0;j <= 1.0; j += 1.0/(steps-1.0)) {
+        
+        if(j > 1) j = 1;
+        
+        var pos = curve(j);
+        var tg = curveD(j);
+        
+        vec3.normalize(tg, tg);
+        var up = [0, 0, 1];
+        var left = [];
+        vec3.cross(left, up, tg);
+        vec3.normalize(left, left);
+        vec3.cross(up, tg, left);
+
+        mat4.identity(localMat);
+        mat4.translate(localMat, localMat, pos);
+        mat4.multiply(localMat, localMat, [].concat(
+          left, [0],
+          up, [0],
+          tg, [0],
+          [0, 0, 0, 1]
+        ));
+        
+        for (i = 0.0;i < cutVerts.length; i++) {
+            // Para cada vértice definimos su posición
+            // Cilindro
+            var vec = [];
+            vec = vec3.transformMat4(vec, cutVerts[i].concat(0), localMat);
+            this.position_buffer = this.position_buffer.concat(vec);
+
+            // Para cada vértice definimos su color
+            this.color_buffer.push(i/this.cols);
+            this.color_buffer.push(j/this.rows);
+            this.color_buffer.push(0.5);
+
+       };
+    };
+}
+
+// Circle uses center + TRIANGLE_FAN 
 Circle = function() { }
 Circle.prototype = new SceneNode();
 
@@ -364,35 +453,7 @@ Circle.prototype.setupIndexBuffer = function() {
     }
 }
 
-// Cilindro
-Cylinder = function() { }
-Cylinder.prototype = new Grid();
-// Redefinimos los metodos de datos propios de la figura
-Cylinder.prototype.setupModelData = function(cols, rows) {
-    this.cols = cols;
-    this.rows = rows;
-
-    this.position_buffer = [];
-    this.color_buffer = [];
-
-    for (j = 0.0;j < this.rows; j++) {
-        for (i = 0.0;i < this.cols; i++) {
-            // Para cada vértice definimos su posición
-            // Cilindro
-            this.position_buffer.push(0.5*Math.cos(2.0*Math.PI*i/(this.cols-1)));
-            this.position_buffer.push(0.5*Math.sin(2.0*Math.PI*i/(this.cols-1)));
-            this.position_buffer.push(j/(this.rows-1));
-
-            // Para cada vértice definimos su color
-            this.color_buffer.push(i/this.cols);
-            this.color_buffer.push(j/this.rows);
-            this.color_buffer.push(0.5);
-
-       };
-    };
-}
-
-// Cilindro
+// Superficie de revolucion arbitraria
 SurfaceOfRevolution = function() { }
 SurfaceOfRevolution.prototype = new Grid();
 // Redefinimos los metodos de datos propios de la figura
