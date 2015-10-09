@@ -86,7 +86,8 @@ function ProgramManager() {
     this.setProjectionMatrix = function() {
         var u_proj_matrix = gl.getUniformLocation(this.active, "uProjectionMatrix");
         var pMatrix = mat4.create();
-        mat4.perspective(pMatrix, Math.PI/4, canvas.width/canvas.height, 0.1, 1000.0);
+        mat4.perspective(pMatrix, Math.PI/4, canvas.width/canvas.height, 0.1, 100.0);
+        //mat4.ortho(pMatrix, -1.0, 1.0, -1.0, 1.0, -10, 100.0);
         gl.uniformMatrix4fv(u_proj_matrix, false, pMatrix);
     }
 
@@ -143,6 +144,7 @@ function SceneNode() {
     this.position_buffer = null;
     this.color_buffer = null;
     this.index_buffer = null;
+    this.draw_mode = null; //triangle strip, etc
     // Buffers GPU
     this.webgl_position_buffer = null;
     this.webgl_color_buffer = null;
@@ -155,6 +157,7 @@ function SceneNode() {
         this.programid = programid;
         this.mMatrix = mat4.create();
         this.children = [];
+        this.draw_mode = gl.TRIANGLE_STRIP;
     }
     // Translate
     this.translate = function(vec) {
@@ -260,7 +263,7 @@ function SceneNode() {
         // Setup shaders, buffers and attributes
         this.setupShaders(this.parent.getModelMatrix());
         // Draw self
-        gl.drawElements(gl.TRIANGLE_STRIP, this.index_buffer.length, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(this.draw_mode, this.index_buffer.length, gl.UNSIGNED_SHORT, 0);
         // Delegate draw each child
         this.children.forEach(function (child) {
             child.draw();
@@ -281,16 +284,16 @@ Grid.prototype.setupModelData = function(cols, rows) {
 
     for (j = 0.0;j < this.rows; j++) {
         for (i = 0.0;i < this.cols; i++) {
-           // Para cada vértice definimos su posición
-           // Plano
-           this.position_buffer.push(i/this.cols);
-           this.position_buffer.push(j/this.rows);
-           this.position_buffer.push(0.0);
+            // Para cada vértice definimos su posición
+            // Plano
+            this.position_buffer.push(i/this.cols);
+            this.position_buffer.push(j/this.rows);
+            this.position_buffer.push(0.0);
 
-           // Para cada vértice definimos su color
-           this.color_buffer.push(i/this.cols);
-           this.color_buffer.push(j/this.rows);
-           this.color_buffer.push(0.5);
+            // Para cada vértice definimos su color
+            this.color_buffer.push(i/this.cols);
+            this.color_buffer.push(j/this.rows);
+            this.color_buffer.push(0.5);
 
        };
     };
@@ -318,6 +321,49 @@ Grid.prototype.setupIndexBuffer = function() {
     }
 }
 
+// Circle = fan grid
+Circle = function() { }
+Circle.prototype = new SceneNode();
+
+Circle.prototype.setupModelData = function(steps) {
+    this.steps = steps;
+    this.draw_mode = gl.TRIANGLE_FAN;
+    
+    this.position_buffer = [];
+    this.color_buffer = [];
+
+    // Center
+    this.position_buffer.push(0.0);
+    this.position_buffer.push(0.0);
+    this.position_buffer.push(0.0);
+    
+    this.color_buffer.push(1.0);
+    this.color_buffer.push(0.0);
+    this.color_buffer.push(0.0);
+    
+    // Edges
+    for (j = 0.0;j < this.steps; j++) {
+        // Para cada vértice definimos su posición
+        // Plano
+        this.position_buffer.push(0.5*Math.cos(2.0*Math.PI*j/(this.steps-1)));
+        this.position_buffer.push(0.5*Math.sin(2.0*Math.PI*j/(this.steps-1)));
+        this.position_buffer.push(0.0);
+
+        // Para cada vértice definimos su color
+        this.color_buffer.push(j/this.steps);
+        this.color_buffer.push(1.0);
+        this.color_buffer.push(j/this.steps);
+    };
+}
+
+Circle.prototype.setupIndexBuffer = function() {
+    this.index_buffer = [];
+    // steps + 1 for the center
+    for(i = 0; i < this.steps+1; i++) {
+        this.index_buffer.push(i);
+    }
+}
+
 // Cilindro
 Cylinder = function() { }
 Cylinder.prototype = new Grid();
@@ -331,16 +377,46 @@ Cylinder.prototype.setupModelData = function(cols, rows) {
 
     for (j = 0.0;j < this.rows; j++) {
         for (i = 0.0;i < this.cols; i++) {
-           // Para cada vértice definimos su posición
-           // Cilindro
-           this.position_buffer.push(0.5*Math.cos(2.0*Math.PI*i/(this.cols-1)));
-           this.position_buffer.push(0.5*Math.sin(2.0*Math.PI*i/(this.cols-1)));
-           this.position_buffer.push(j/this.rows);
+            // Para cada vértice definimos su posición
+            // Cilindro
+            this.position_buffer.push(0.5*Math.cos(2.0*Math.PI*i/(this.cols-1)));
+            this.position_buffer.push(0.5*Math.sin(2.0*Math.PI*i/(this.cols-1)));
+            this.position_buffer.push(j/(this.rows-1));
 
-           // Para cada vértice definimos su color
-           this.color_buffer.push(i/this.cols);
-           this.color_buffer.push(j/this.rows);
-           this.color_buffer.push(0.5);
+            // Para cada vértice definimos su color
+            this.color_buffer.push(i/this.cols);
+            this.color_buffer.push(j/this.rows);
+            this.color_buffer.push(0.5);
+
+       };
+    };
+}
+
+// Cilindro
+SurfaceOfRevolution = function() { }
+SurfaceOfRevolution.prototype = new Grid();
+// Redefinimos los metodos de datos propios de la figura
+// paraFunc es una funcion R -> R en [0, 1]
+SurfaceOfRevolution.prototype.setupModelData = function(cols, rows, paramFunc) {
+    this.cols = cols;
+    this.rows = rows;
+
+    this.position_buffer = [];
+    this.color_buffer = [];
+    
+    for (j = 0.0;j < this.rows; j++) {
+        for (i = 0.0;i < this.cols; i++) {
+            // Para cada vértice definimos su posición
+            // Cilindro
+            var u = j/(this.rows-1);
+            this.position_buffer.push(paramFunc(u) * 0.5*Math.cos(2.0*Math.PI*i/(this.cols-1)));
+            this.position_buffer.push(paramFunc(u) * 0.5*Math.sin(2.0*Math.PI*i/(this.cols-1)));
+            this.position_buffer.push(u);
+
+            // Para cada vértice definimos su color
+            this.color_buffer.push(i/this.cols);
+            this.color_buffer.push(j/this.rows);
+            this.color_buffer.push(0.5);
 
        };
     };

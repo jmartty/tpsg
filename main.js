@@ -46,32 +46,22 @@ function main() {
     sceneRoot = new SceneRoot();
 
     // Creacion de instancias de modelos
-    cylinder = new Cylinder();
-    cylinder.create("cylinder", "default");
-    cylinder.setupModelData(20, 10);
-    cylinder.setupIndexBuffer();
-    cylinder.setupGLBuffers();
-
-    cylinder2 = new Cylinder();
-    cylinder2.create("cylinder2", "default");
-    cylinder2.setupModelData(20, 10);
-    cylinder2.setupIndexBuffer();
-    cylinder2.setupGLBuffers();
-
-    grid = new Grid();
-    grid.create("grid", "default");
-    grid.setupModelData(10, 10);
-    grid.setupIndexBuffer();
-    grid.setupGLBuffers();
+    cone = new SurfaceOfRevolution();
+    cone.create("rs", "default");
+    cone.setupModelData(10, 15, function(u){ return u; });
+    cone.setupIndexBuffer();
+    cone.setupGLBuffers();
+    
+    top_cap = new Circle();
+    top_cap.create("circle", "default");
+    top_cap.setupModelData(10);
+    top_cap.setupIndexBuffer();
+    top_cap.setupGLBuffers();
+    top_cap.translate([0.0, 0.0, 1.0]);
     
     // Construimos la escena
-    sceneRoot.attachChild(cylinder);
-    cylinder.attachChild(cylinder2);
-    cylinder.attachChild(grid);
-    grid.translate([-0.5, -0.5, 0.0]);
-    cylinder2.scale([0.5, 0.5, 0.5]);
-    cylinder2.rotate(90, [0.0, 1.0, 0.0]);
-    cylinder2.translate([-1.0, 0.0, 0.5]);
+    sceneRoot.attachChild(cone);
+    cone.attachChild(top_cap);
 
     // Draw
     //drawScene();
@@ -83,9 +73,7 @@ function main() {
 function drawScene() {
     requestAnimationFrame(drawScene);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    cylinder.reset();
-    cylinder.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
-    cylinder.translate([0.0, 1.5, 0.0]);
-    cylinder.rotate(-document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
+    cone.reset();
+    cone.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
     sceneRoot.draw();
 }
