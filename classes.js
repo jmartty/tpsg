@@ -5,6 +5,12 @@ function ProgramManager() {
     this.programs = [];
     this.shaders = [];
     this.active = null;
+    
+    this.mMatrix = null;
+    this.vMatrix = null;
+    this.nMatrix = null;
+    this.pMatrix = null;
+    
     // Methods
     // Agregar y compilar un shader
     this.addShader = function(shaderid) {
@@ -85,25 +91,38 @@ function ProgramManager() {
     // No creo que cambie en ningun momento pero se podria parametrizar
     this.setProjectionMatrix = function() {
         var u_proj_matrix = gl.getUniformLocation(this.active, "uProjectionMatrix");
-        var pMatrix = mat4.create();
-        mat4.perspective(pMatrix, Math.PI/4, canvas.width/canvas.height, 0.1, 100.0);
+        this.pMatrix = mat4.create();
+        mat4.perspective(this.pMatrix, Math.PI/4, canvas.width/canvas.height, 0.1, 100.0);
         //mat4.ortho(pMatrix, -1.0, 1.0, -1.0, 1.0, -10, 100.0);
-        gl.uniformMatrix4fv(u_proj_matrix, false, pMatrix);
+        gl.uniformMatrix4fv(u_proj_matrix, false, this.pMatrix);
     }
 
     // Debera tomar parametros eventualmente si se puede cambiar la camara
     this.setViewMatrix = function() {
         var u_view_matrix = gl.getUniformLocation(this.active, "uViewMatrix");
-        var vMatrix = mat4.create();
-        mat4.lookAt(vMatrix, [3, 3, 3], [0, 0, 0], [0, 0, 1]);
-        gl.uniformMatrix4fv(u_view_matrix, false, vMatrix);
+        this.vMatrix = mat4.create();
+        mat4.lookAt(this.vMatrix, [3, 3, 3], [0, 0, 0], [0, 0, 1]);
+        gl.uniformMatrix4fv(u_view_matrix, false, this.vMatrix);
     }
 
     // Lo carga cada modelo
     this.setModelMatrix = function(mMatrix) {
-        if(mMatrix == null) var mMatrix = mat4.create();
+        if(mMatrix == null) {
+            this.mMatrix = mat4.create();
+        }else{
+            this.mMatrix = mMatrix;
+        }
         var u_model_matrix = gl.getUniformLocation(this.active, "uModelMatrix");
-        gl.uniformMatrix4fv(u_model_matrix, false, mMatrix);
+        gl.uniformMatrix4fv(u_model_matrix, false, this.mMatrix);
+    }
+    // Matriz de normales para iluminacion, usa model y view matrix setteadas anteriormente por setModelMatrix y setViewMatrix
+    this.setNormalMatrix = function() {
+        this.nMatrix = mat4.create();
+        mat4.multiply(this.nMatrix, this.vMatrix, this.mMatrix);
+        mat4.invert(this.nMatrix, this.nMatrix);
+        mat4.transpose(this.nMatrix, this.nMatrix);
+        var u_normal_matrix = gl.getUniformLocation(this.active, "uNormalMatrix");
+        gl.uniformMatrix4fv(u_normal_matrix, false, this.nMatrix);
     }
 }
 
@@ -137,16 +156,20 @@ function SceneNode() {
     this.name = null;
     this.programid = null;
     this.children = null;
+    this.lights = null;
     this.parent = null;
     // Model matrix
     this.mMatrix = null;
+    
     // Buffers locales
     this.position_buffer = null;
+    this.normal_buffer = null;
     this.color_buffer = null;
     this.index_buffer = null;
     this.draw_mode = null; //triangle strip, etc
     // Buffers GPU
     this.webgl_position_buffer = null;
+    this.webgl_normal_buffer = null;
     this.webgl_color_buffer = null;
     this.webgl_index_buffer = null;
 
@@ -157,8 +180,13 @@ function SceneNode() {
         this.programid = programid;
         this.mMatrix = mat4.create();
         this.children = [];
+        this.lights = [];
         this.draw_mode = gl.TRIANGLE_STRIP;
     }
+    // Manage lights
+    //this.addStaticLight = function(position, direction, color) {
+    //TODO
+    //}
     // Translate
     this.translate = function(vec) {
         mat4.translate(this.mMatrix, this.mMatrix, vec);
@@ -209,6 +237,11 @@ function SceneNode() {
             gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_position_buffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.position_buffer), gl.STATIC_DRAW);
         }
+        if(this.normal_buffer) {
+            this.webgl_normal_buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_normal_buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.normal_buffer), gl.STATIC_DRAW);
+        }
         if(this.color_buffer) {
             this.webgl_color_buffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_color_buffer);
@@ -238,6 +271,16 @@ function SceneNode() {
             gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
         }else{
             alert("No GL position buffer set for " + this.name);
+        }
+        // Normals (optional)
+        if(this.webgl_normal_buffer) {
+            // Load normals
+            var vertexNormalAttribute = gl.getAttribLocation(programManager.active, "aVertexNormal");
+            gl.enableVertexAttribArray(vertexNormalAttribute);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_normal_buffer);
+            gl.vertexAttribPointer(vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
+            // Load normal's matrix
+            programManager.setNormalMatrix();
         }
         // Color
         if(this.webgl_color_buffer) {
@@ -278,11 +321,12 @@ function SceneNode() {
 Grid = function() { }
 Grid.prototype = new SceneNode();
 
-Grid.prototype.setupModelData = function(cols, rows) {
+Grid.prototype.setupModelData = function(cols, rows, color) {
     this.cols = cols;
     this.rows = rows;
 
     this.position_buffer = [];
+    this.normal_buffer = [];
     this.color_buffer = [];
 
     for (j = 0.0;j < this.rows; j++) {
@@ -292,11 +336,15 @@ Grid.prototype.setupModelData = function(cols, rows) {
             this.position_buffer.push(i/this.cols);
             this.position_buffer.push(j/this.rows);
             this.position_buffer.push(0.0);
+            
+            this.normal_buffer.push(0.0);
+            this.normal_buffer.push(0.0);
+            this.normal_buffer.push(1.0);
 
             // Para cada vértice definimos su color
-            this.color_buffer.push(i/this.cols);
-            this.color_buffer.push(j/this.rows);
-            this.color_buffer.push(0.5);
+            this.color_buffer.push(color[0]);
+            this.color_buffer.push(color[1]);
+            this.color_buffer.push(color[2]);
 
        };
     };

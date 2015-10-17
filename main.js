@@ -34,28 +34,25 @@ function main() {
     programManager = new ProgramManager();
     // Add shaders from <script>
     programManager.addShader("default-vs");
+    programManager.addShader("lighting-vs");
     programManager.addShader("default-fs");
     // Create programs with shaders
     programManager.addProgram("default", ["default-vs", "default-fs"]);
-    // Enable default program
-    programManager.useProgram("default");
+    programManager.addProgram("lighting", ["lighting-vs", "default-fs"]);
 
     // Setup de la escena
     sceneRoot = new SceneRoot();
 
     // Creacion de instancias de modelos
-    es = new ExtrusionSurface();
-    es.create("es", "default");
-    es.setupModelData([[0.1, 0.1], [-0.1, 0.1], [-0.1, -0.1], [0.1, -0.1]],
-                      function(u){ return [2*u, Math.sin(u*Math.PI*2), 0]; },
-                      function(u){ return [2, Math.cos(u*Math.PI*2), 0]; },
-                      100);
-    //es.draw_mode = gl.LINE_STRIP;
-    es.setupIndexBuffer();
-    es.setupGLBuffers();
+    foo = new Grid();
+    foo.create("foo", "lighting");
+    foo.setupModelData(10, 10, [0, 0, 180]);
+    //foo.draw_mode = gl.LINE_STRIP;
+    foo.setupIndexBuffer();
+    foo.setupGLBuffers();
     
     // Construimos la escena
-    sceneRoot.attachChild(es);
+    sceneRoot.attachChild(foo);
 
     // Dibujamos los ejes
     axis_x = new Curve();
@@ -89,7 +86,8 @@ function main() {
 function drawScene() {
     requestAnimationFrame(drawScene);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    es.reset();
-    es.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
+    foo.reset();
+    //foo.scale([10.0, 10.0, 10.0]);
+    foo.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
     sceneRoot.draw();
 }
