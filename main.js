@@ -46,7 +46,7 @@ function main() {
     // Creacion de instancias de modelos
     foo = new Grid();
     foo.create("foo", "lighting");
-    foo.setupModelData(10, 10, [0, 0, 180]);
+    foo.setupModelData(10, 10, [0, 1, 0]);
     //foo.draw_mode = gl.LINE_STRIP;
     foo.setupIndexBuffer();
     foo.setupGLBuffers();

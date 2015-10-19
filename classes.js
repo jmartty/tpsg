@@ -117,12 +117,12 @@ function ProgramManager() {
     }
     // Matriz de normales para iluminacion, usa model y view matrix setteadas anteriormente por setModelMatrix y setViewMatrix
     this.setNormalMatrix = function() {
-        this.nMatrix = mat4.create();
-        mat4.multiply(this.nMatrix, this.vMatrix, this.mMatrix);
-        mat4.invert(this.nMatrix, this.nMatrix);
-        mat4.transpose(this.nMatrix, this.nMatrix);
+        var MVMatrix = mat4.create();
+        mat4.multiply(MVMatrix, this.mMatrix, this.vMatrix);
+        this.nMatrix = mat3.create();
+        mat3.normalFromMat4(this.nMatrix, MVMatrix);
         var u_normal_matrix = gl.getUniformLocation(this.active, "uNormalMatrix");
-        gl.uniformMatrix4fv(u_normal_matrix, false, this.nMatrix);
+        gl.uniformMatrix3fv(u_normal_matrix, false, this.nMatrix);
     }
 }
 
