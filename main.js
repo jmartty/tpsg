@@ -46,7 +46,7 @@ function main() {
     // Creacion de instancias de modelos
     foo = new Cylinder();
     foo.create("foo", "lighting");
-    foo.setupModelData(10, 10, [0, 1, 0]);
+    foo.setupModelData(50, 50, [0, 1, 0]);
     //foo.draw_mode = gl.LINE_STRIP;
     foo.setupIndexBuffer();
     foo.setupGLBuffers();
@@ -60,7 +60,7 @@ function main() {
     
     // Construimos la escena
     sceneRoot.attachChild(grid);
-    //grid.attachChild(foo);
+    grid.attachChild(foo);
 
     // Dibujamos los ejes
     axis_x = new Curve();

@@ -113,10 +113,8 @@ function ProgramManager() {
     }
     // Matriz de normales para iluminacion
     this.setNormalMatrix = function(mMatrix) {
-        var MVMatrix = mat4.create();
-        mat4.multiply(MVMatrix, this.vMatrix, mMatrix);
         var nMatrix = mat3.create();
-        mat3.normalFromMat4(nMatrix, MVMatrix);
+        mat3.normalFromMat4(nMatrix, mMatrix);
         var u_normal_matrix = gl.getUniformLocation(this.active, "uNormalMatrix");
         gl.uniformMatrix3fv(u_normal_matrix, false, nMatrix);
         return nMatrix;
