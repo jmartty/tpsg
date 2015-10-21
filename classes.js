@@ -403,15 +403,17 @@ ExtrusionSurface.prototype = new Grid();
 // cutVerts = array of vertices (2d) in the XY plane definining the cut
 // curve = f(u), R->R^3
 // curveD = f'(u), derivative of f(u)
-// steps = number of divisions of paramter to u
-ExtrusionSurface.prototype.setupModelData = function(cutVerts, curve, curveD, steps) {
+// steps = number of divisions of paramter u
+ExtrusionSurface.prototype.setupModelData = function(cutVerts, cutNormals, color, curve, curveD, steps) {
     // Connect last with first
     cutVerts.push(cutVerts[0]);
+    cutNormals.push(cutNormals[0]);
     
     this.cols = cutVerts.length;
     this.rows = steps;
 
     this.position_buffer = [];
+    this.normal_buffer = [];
     this.color_buffer = [];
     
     var localMat = mat4.create();
@@ -437,17 +439,21 @@ ExtrusionSurface.prototype.setupModelData = function(cutVerts, curve, curveD, st
           [0, 0, 0, 1]
         ));
         
+        var normalMat = mat3.create();
+        mat3.normalFromMat4(normalMat, localMat);
+        
         for (i = 0.0;i < cutVerts.length; i++) {
             // Para cada vértice definimos su posición
-            // Cilindro
             var vec = [];
-            vec = vec3.transformMat4(vec, cutVerts[i].concat(0), localMat);
+            vec3.transformMat4(vec, cutVerts[i].concat(0), localMat);
             this.position_buffer = this.position_buffer.concat(vec);
-
-            // Para cada vértice definimos su color
-            this.color_buffer.push(i/(this.cols-1));
-            this.color_buffer.push(j/(this.rows-1));
-            this.color_buffer.push(0.5);
+            
+            vec3.transformMat3(vec, cutNormals[i].concat(0), normalMat);
+            this.normal_buffer = this.normal_buffer.concat(vec);
+            
+            this.color_buffer.push(color[0]);
+            this.color_buffer.push(color[1]);
+            this.color_buffer.push(color[2]);
 
        }
     }

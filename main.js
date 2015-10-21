@@ -44,9 +44,14 @@ function main() {
     sceneRoot = new SceneRoot();
 
     // Creacion de instancias de modelos
-    foo = new SurfaceOfRevolution();
+    foo = new ExtrusionSurface();
     foo.create("foo", "lighting");
-    foo.setupModelData(50, 50, [0, 1, 0], function(u){ return Math.sin(Math.PI*u); }, function(u){ return Math.PI*Math.cos(Math.PI*u); });
+    foo.setupModelData([[0.1, 0.1], [-0.1, 0.1], [-0.1, -0.1], [0.1, -0.1]],
+                       [[0.7, 0.7], [-0.7, 0.7], [-0.7, -0.7], [0.7, -0.7]],
+                       [0.0, 0.0, 1.0],
+                      function(u){ return [2*u, Math.sin(u*Math.PI*2), 0]; },
+                      function(u){ return [2, Math.cos(u*Math.PI*2), 0]; },
+                      100);
     //foo.draw_mode = gl.LINE_STRIP;
     foo.setupIndexBuffer();
     foo.setupGLBuffers();
