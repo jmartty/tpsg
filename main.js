@@ -44,15 +44,23 @@ function main() {
     sceneRoot = new SceneRoot();
 
     // Creacion de instancias de modelos
-    foo = new Grid();
+    foo = new Cylinder();
     foo.create("foo", "lighting");
     foo.setupModelData(10, 10, [0, 1, 0]);
     //foo.draw_mode = gl.LINE_STRIP;
     foo.setupIndexBuffer();
     foo.setupGLBuffers();
     
+    grid = new Grid();
+    grid.create("grid", "lighting");
+    grid.setupModelData(10, 10, [1, 1, 0]);
+    //grid.draw_mode = gl.LINE_STRIP;
+    grid.setupIndexBuffer();
+    grid.setupGLBuffers();
+    
     // Construimos la escena
-    sceneRoot.attachChild(foo);
+    sceneRoot.attachChild(grid);
+    //grid.attachChild(foo);
 
     // Dibujamos los ejes
     axis_x = new Curve();
@@ -86,8 +94,7 @@ function main() {
 function drawScene() {
     requestAnimationFrame(drawScene);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    foo.reset();
-    //foo.scale([10.0, 10.0, 10.0]);
-    foo.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
+    grid.reset();
+    grid.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
     sceneRoot.draw();
 }

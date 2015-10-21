@@ -6,9 +6,7 @@ function ProgramManager() {
     this.shaders = [];
     this.active = null;
     
-    this.mMatrix = null;
     this.vMatrix = null;
-    this.nMatrix = null;
     this.pMatrix = null;
     
     // Methods
@@ -95,6 +93,7 @@ function ProgramManager() {
         mat4.perspective(this.pMatrix, Math.PI/4, canvas.width/canvas.height, 0.1, 100.0);
         //mat4.ortho(pMatrix, -1.0, 1.0, -1.0, 1.0, -10, 100.0);
         gl.uniformMatrix4fv(u_proj_matrix, false, this.pMatrix);
+        return this.pMatrix;
     }
 
     // Debera tomar parametros eventualmente si se puede cambiar la camara
@@ -103,26 +102,24 @@ function ProgramManager() {
         this.vMatrix = mat4.create();
         mat4.lookAt(this.vMatrix, [3, 3, 3], [0, 0, 0], [0, 0, 1]);
         gl.uniformMatrix4fv(u_view_matrix, false, this.vMatrix);
+        return this.vMatrix;
     }
 
     // Lo carga cada modelo
     this.setModelMatrix = function(mMatrix) {
-        if(mMatrix == null) {
-            this.mMatrix = mat4.create();
-        }else{
-            this.mMatrix = mMatrix;
-        }
         var u_model_matrix = gl.getUniformLocation(this.active, "uModelMatrix");
-        gl.uniformMatrix4fv(u_model_matrix, false, this.mMatrix);
+        gl.uniformMatrix4fv(u_model_matrix, false, mMatrix);
+        return mMatrix;
     }
-    // Matriz de normales para iluminacion, usa model y view matrix setteadas anteriormente por setModelMatrix y setViewMatrix
-    this.setNormalMatrix = function() {
+    // Matriz de normales para iluminacion
+    this.setNormalMatrix = function(mMatrix) {
         var MVMatrix = mat4.create();
-        mat4.multiply(MVMatrix, this.mMatrix, this.vMatrix);
-        this.nMatrix = mat3.create();
-        mat3.normalFromMat4(this.nMatrix, MVMatrix);
+        mat4.multiply(MVMatrix, this.vMatrix, mMatrix);
+        var nMatrix = mat3.create();
+        mat3.normalFromMat4(nMatrix, MVMatrix);
         var u_normal_matrix = gl.getUniformLocation(this.active, "uNormalMatrix");
-        gl.uniformMatrix3fv(u_normal_matrix, false, this.nMatrix);
+        gl.uniformMatrix3fv(u_normal_matrix, false, nMatrix);
+        return nMatrix;
     }
 }
 
@@ -183,10 +180,7 @@ function SceneNode() {
         this.lights = [];
         this.draw_mode = gl.TRIANGLE_STRIP;
     }
-    // Manage lights
-    //this.addStaticLight = function(position, direction, color) {
-    //TODO
-    //}
+
     // Translate
     this.translate = function(vec) {
         mat4.translate(this.mMatrix, this.mMatrix, vec);
@@ -261,7 +255,7 @@ function SceneNode() {
         // Setup uniforms
         programManager.setProjectionMatrix();
         programManager.setViewMatrix();
-        programManager.setModelMatrix(this.getModelMatrix());
+        programManager.setModelMatrix(modelMatrix);
         // Enable each attribute (if gl buffer is set)
         // Position
         if(this.webgl_position_buffer) {
@@ -280,7 +274,7 @@ function SceneNode() {
             gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_normal_buffer);
             gl.vertexAttribPointer(vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
             // Load normal's matrix
-            programManager.setNormalMatrix();
+            programManager.setNormalMatrix(modelMatrix);
         }
         // Color
         if(this.webgl_color_buffer) {
@@ -304,9 +298,10 @@ function SceneNode() {
         // Draw self
         //console.log("Drawing " + this.name);
         // Setup shaders, buffers and attributes
-        this.setupShaders(this.parent.getModelMatrix());
+        this.setupShaders(this.getModelMatrix());
         // Draw self
         gl.drawElements(this.draw_mode, this.index_buffer.length, gl.UNSIGNED_SHORT, 0);
+
         // Delegate draw each child
         this.children.forEach(function (child) {
             child.draw();
@@ -376,25 +371,29 @@ Grid.prototype.setupIndexBuffer = function() {
 Cylinder = function() { }
 Cylinder.prototype = new Grid();
 // Redefinimos los metodos de datos propios de la figura
-Cylinder.prototype.setupModelData = function(cols, rows) {
+Cylinder.prototype.setupModelData = function(cols, rows, color) {
     this.cols = cols;
     this.rows = rows;
 
     this.position_buffer = [];
+    this.normal_buffer = [];
     this.color_buffer = [];
 
     for (j = 0.0;j < this.rows; j++) {
         for (i = 0.0;i < this.cols; i++) {
-            // Para cada vértice definimos su posición
+
             // Cilindro
             this.position_buffer.push(0.5*Math.cos(2.0*Math.PI*i/(this.cols-1)));
             this.position_buffer.push(0.5*Math.sin(2.0*Math.PI*i/(this.cols-1)));
             this.position_buffer.push(j/(this.rows-1));
 
-            // Para cada vértice definimos su color
-            this.color_buffer.push(i/this.cols);
-            this.color_buffer.push(j/this.rows);
-            this.color_buffer.push(0.5);
+            this.normal_buffer.push(Math.cos(2.0*Math.PI*i/(this.cols-1)));
+            this.normal_buffer.push(Math.sin(2.0*Math.PI*i/(this.cols-1)));
+            this.normal_buffer.push(0.0);
+            
+            this.color_buffer.push(color[0]);
+            this.color_buffer.push(color[1]);
+            this.color_buffer.push(color[2]);
 
        };
     };

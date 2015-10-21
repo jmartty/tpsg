@@ -37,7 +37,7 @@
                 vec3 directionalVector = vec3(0.0, 0.0, 1.0);
                 vec3 transformedNormal = uNormalMatrix * aVertexNormal;
                 
-                float directional = max(dot(transformedNormal, directionalVector), -1.0);
+                float directional = max(dot(transformedNormal, directionalVector), 0.0);
                 
                 vColor = vec4(ambientLight + (directional * directionalLightColor * aVertexColor.rgb), 1.0);
                 gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aVertexPosition.xyz, 1.0);
