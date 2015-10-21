@@ -486,17 +486,22 @@ Curve.prototype.setupIndexBuffer = function() {
 Circle = function() { }
 Circle.prototype = new SceneNode();
 
-Circle.prototype.setupModelData = function(steps) {
+Circle.prototype.setupModelData = function(steps, color) {
     this.steps = steps;
     this.draw_mode = gl.TRIANGLE_FAN;
     
     this.position_buffer = [];
     this.color_buffer = [];
+    this.normal_buffer = []
 
     // Center
     this.position_buffer.push(0.0);
     this.position_buffer.push(0.0);
     this.position_buffer.push(0.0);
+
+    this.normal_buffer.push(0.0);
+    this.normal_buffer.push(0.0);
+    this.normal_buffer.push(1.0);
     
     this.color_buffer.push(1.0);
     this.color_buffer.push(0.0);
@@ -510,10 +515,14 @@ Circle.prototype.setupModelData = function(steps) {
         this.position_buffer.push(0.5*Math.sin(2.0*Math.PI*j/(this.steps-1)));
         this.position_buffer.push(0.0);
 
+        this.normal_buffer.push(0.0);
+        this.normal_buffer.push(0.0);
+        this.normal_buffer.push(1.0);
+        
         // Para cada vértice definimos su color
-        this.color_buffer.push(j/this.steps);
-        this.color_buffer.push(1.0);
-        this.color_buffer.push(j/this.steps);
+        this.color_buffer.push(color[0]);
+        this.color_buffer.push(color[1]);
+        this.color_buffer.push(color[2]);
     };
 }
 
@@ -529,27 +538,38 @@ Circle.prototype.setupIndexBuffer = function() {
 SurfaceOfRevolution = function() { }
 SurfaceOfRevolution.prototype = new Grid();
 // Redefinimos los metodos de datos propios de la figura
-// paraFunc es una funcion R -> R en [0, 1]
-SurfaceOfRevolution.prototype.setupModelData = function(cols, rows, paramFunc) {
+// paramFunc es una funcion R -> R en [0, 1]
+// dParamFunc es la derivada de paramFunc
+SurfaceOfRevolution.prototype.setupModelData = function(cols, rows, color, paramFunc, dParamFunc) {
     this.cols = cols;
     this.rows = rows;
 
     this.position_buffer = [];
     this.color_buffer = [];
+    this.normal_buffer = [];
     
     for (j = 0.0;j < this.rows; j++) {
         for (i = 0.0;i < this.cols; i++) {
-            // Para cada vértice definimos su posición
-            // Cilindro
+
             var u = j/(this.rows-1);
+            
             this.position_buffer.push(paramFunc(u) * 0.5*Math.cos(2.0*Math.PI*i/(this.cols-1)));
             this.position_buffer.push(paramFunc(u) * 0.5*Math.sin(2.0*Math.PI*i/(this.cols-1)));
             this.position_buffer.push(u);
 
-            // Para cada vértice definimos su color
-            this.color_buffer.push(i/this.cols);
-            this.color_buffer.push(j/this.rows);
-            this.color_buffer.push(0.5);
+            // Calcular el normal lleva un poco de trabajo.. normal = tg x o->p
+            var normal = vec3.create();
+            var tg = vec3.fromValues(dParamFunc(u) * Math.cos(2.0*Math.PI*i/(this.cols-1)),
+                                     dParamFunc(u) * Math.sin(2.0*Math.PI*i/(this.cols-1)),
+                                     1.0);
+            var op = vec3.fromValues(-Math.sin(2.0*Math.PI*i/(this.cols-1)), Math.cos(2.0*Math.PI*i/(this.cols-1)), 0.0);
+            vec3.cross(normal, op, tg);
+            vec3.normalize(normal, normal);
+            this.normal_buffer = this.normal_buffer.concat(normal[0], normal[1], normal[2]);            
+            
+            this.color_buffer.push(color[0]);
+            this.color_buffer.push(color[1]);
+            this.color_buffer.push(color[2]);
 
        };
     };
