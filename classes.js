@@ -326,8 +326,8 @@ Grid.prototype.setupModelData = function(cols, rows, color) {
         for (i = 0.0;i < this.cols; i++) {
             // Para cada vértice definimos su posición
             // Plano
-            this.position_buffer.push(i/this.cols);
-            this.position_buffer.push(j/this.rows);
+            this.position_buffer.push(i/(this.cols-1));
+            this.position_buffer.push(j/(this.rows-1));
             this.position_buffer.push(0.0);
             
             this.normal_buffer.push(0.0);
