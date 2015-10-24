@@ -58,28 +58,34 @@ function main() {
     
     // Construimos la escena
     sceneRoot.attachChild(foo);
-
     // Dibujamos los ejes
+    // Los agrupamos en un nodo virtual
+    axes = new SceneNode();
+    axes.create("axes", null);
+    sceneRoot.attachChild(axes);
+    // Un escalado para mostrar que se funciona
+    axes.scale([2.0, 2.0, 0.5]);
+
     axis_x = new Curve();
     axis_x.create("x", "default");
     axis_x.setupModelData(function(u){ return [u, 0, 0]; }, 2);
     axis_x.setupIndexBuffer();
     axis_x.setupGLBuffers();
-    sceneRoot.attachChild(axis_x);
+    axes.attachChild(axis_x);
 
     axis_y = new Curve();
     axis_y.create("y", "default");
     axis_y.setupModelData(function(u){ return [0, u, 0]; }, 2);
     axis_y.setupIndexBuffer();
     axis_y.setupGLBuffers();
-    sceneRoot.attachChild(axis_y);
+    axes.attachChild(axis_y);
     
     axis_z = new Curve();
     axis_z.create("z", "default");
     axis_z.setupModelData(function(u){ return [0, 0, u]; }, 2);
     axis_z.setupIndexBuffer();
     axis_z.setupGLBuffers();
-    sceneRoot.attachChild(axis_z);
+    axes.attachChild(axis_z);
     
     // Draw
     //drawScene();

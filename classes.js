@@ -293,13 +293,13 @@ function SceneNode() {
 
     // Draw node and children
     this.draw = function () {
-        // Draw self
-        //console.log("Drawing " + this.name);
-        // Setup shaders, buffers and attributes
-        this.setupShaders(this.getModelMatrix());
-        // Draw self
-        gl.drawElements(this.draw_mode, this.index_buffer.length, gl.UNSIGNED_SHORT, 0);
-
+        // Draw self (ignore if no buffer has been set)
+        if(this.programid != null) {
+            //console.log("Drawing " + this.name);
+            // Setup shaders, buffers and attributes
+            this.setupShaders(this.getModelMatrix());
+            gl.drawElements(this.draw_mode, this.index_buffer.length, gl.UNSIGNED_SHORT, 0);
+        }
         // Delegate draw each child
         this.children.forEach(function (child) {
             child.draw();
