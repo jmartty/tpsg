@@ -2,7 +2,7 @@ var blue = [ 0, 0, 1 ];
 var red = [ 1, 0, 0 ];
 var darkgreen = [ 0.5, 0.5, 0 ];
 var green = [ 0, 1, 0.5 ];
-var grey = [ 0.5, 0.5, 0.5 ];
+var grey = [ 0.15, 0.15, 0.15 ];
 var yellow = [ 1, 1, 0 ];
 var orange = [ 1, 0.6, 0 ];
 var pink = [ 1, 0.3, 0.7 ];
@@ -18,7 +18,7 @@ function createCylinder(name, color) {
 
 function createPlane(name, color) {
 	var grid = new Grid();
-	grid.create(name, "lighting");
+	grid.create(name, "default");
 	grid.setupModelData(2, 2, color);
 	grid.setupIndexBuffer();
 	grid.setupGLBuffers();
@@ -30,25 +30,25 @@ function createWheel(name, parent) {
 	var color = grey;
 	var cylinder;
 	var i;
-	for (i=0; i<15 ; i++) {
+	for (i=0; i<14 ; i++) {
 		//rueda exterior
 		cylinder = createCylinder(name+"Arc"+i, color);
 		parent.attachChild(cylinder);
-		cylinder.rotate(i*24, [0.0, 1.0, 0.0]);
-		cylinder.translate([2.0, 0.0, -0.425]);
-		cylinder.scale([0.1, 0.1, 0.850]);
+		cylinder.rotate(i*360/14, [0.0, 1.0, 0.0]);
+		cylinder.translate([2.0, 0.0, -0.456]);
+		cylinder.scale([0.1, 0.1, 0.9129]);
 
 		//rueda interior
 		cylinder = createCylinder(name+"ArcInt"+i, color);
 		parent.attachChild(cylinder);
-		cylinder.rotate(i*24, [0.0, 1.0, 0.0]);
-		cylinder.translate([1.0, 0.0, -0.217]);
-		cylinder.scale([0.1, 0.1, 0.425]);
+		cylinder.rotate(i*360/14, [0.0, 1.0, 0.0]);
+		cylinder.translate([1.0, 0.0, -0.228]);
+		cylinder.scale([0.1, 0.1, 0.456]);
 
 		//radios
 		cylinder = createCylinder(name+"Radius"+i, color);
 		parent.attachChild(cylinder);
-		cylinder.rotate(6+(i*24), [0.0, 1.0, 0.0]);
+		cylinder.rotate((i*360/14), [0.0, 1.0, 0.0]);
 
 		cylinder.scale([0.1, 0.1, 2]);
 	}
@@ -83,10 +83,10 @@ function createWheelSet(name, parent) {
 	//uniones
 	var joint;
 	var i;
-	for (i=0; i<15 ; i++) {
+	for (i=0; i<14 ; i++) {
 		joint = createCylinder(name+"Joint"+i, color);
 		parent.attachChild(joint);
-		joint.rotate(i*24, [0.0, 1.0, 0.0]);
+		joint.rotate(i*360/14, [0.0, 1.0, 0.0]);
 		joint.translate([2.0, 0.4, -0.4]);
 		joint.rotate(90, [1.0, 0.0, 0.0]);
 		joint.scale([0.1, 0.1, 0.8]);
@@ -95,24 +95,32 @@ function createWheelSet(name, parent) {
 	return parent;	
 }
 
+//TODOS LOS VAGONES JUNTOS
 function createBoxSet(name, parent) {
-	var i;
-	var box;
+	var i = 0;
 	var boxcolors = [ blue, green, orange, pink, yellow, red,  darkgreen ];
-	for (i=0; i<1 ; i++) {
-		box = createBox(name+"Box"+i, parent, boxcolors[i]);
-		parent.attachChild(box);
 	
-	//	box.rotate(i*48, [0.0, 1.0, 0.0]);
-	//	box.translate([2.0*i, 0, 0]);
+	var box;
 
-		box.scale([0.2, 0.2, 0.2]);
+	for (i; i<7; i++) {
+		box = new SceneNode();
+		box.create("box", null);
+		createBox(name+"Box"+i, box, boxcolors[i]);
+		parent.attachChild(box);
+		var boxcolors = [ blue, green, orange, pink, yellow, red,  darkgreen ];
+		
+		box.rotate(i*360/7, [0.0, 1.0, 0.0]);
+		box.translate([2, 0, -1.15]);		
+		box.rotate(90, [1.0, 0.0, 0.0]);
+		box.scale([0.5, 0.5, 0.5]); 
+
 	}
+
 	return parent;
 
 }
 	
-
+//VAGON DE VUELTA AL MUNDO
 function createBox(name, parent, color) {
 	//front face
 	var face = new SceneNode();
@@ -120,7 +128,6 @@ function createBox(name, parent, color) {
 	createBoxFace("frontalface", face, color);
 	parent.attachChild(face);
 	face.translate([-0.5, -0.5, 0.5]);
-//	face.scale([1.03, 1.03, 1.03]); 
 
 	//back face
 	face = new SceneNode();
@@ -128,7 +135,6 @@ function createBox(name, parent, color) {
 	createBoxFace("backcara", face, color);
 	parent.attachChild(face);
 	face.translate([-0.5, -0.5, -0.5]);
-//	face.scale([1.03, 1.03, 1.03]); 
 
 	//side face
 	face = new SceneNode();
@@ -137,7 +143,6 @@ function createBox(name, parent, color) {
 	parent.attachChild(face);
 	face.rotate(90, [0.0, 1.0, 0.0]);
 	face.translate([-0.5, -0.5, -0.5]);
-//	face.scale([1.03, 1.03, 1.03]); 
 
 	//other side face
 	face = new SceneNode();
@@ -146,21 +151,18 @@ function createBox(name, parent, color) {
 	parent.attachChild(face);
 	face.rotate(-90, [0.0, 1.0, 0.0]);
 	face.translate([-0.5, -0.5, -0.5]);
-//	face.scale([1.03, 1.03, 1.03]); 
 
 	//roof
 	var grid = createPlane(name, color);
 	parent.attachChild(grid);
 	grid.translate([-0.5, 1.5, -0.5]);
 	grid.rotate(90, [1.0, 0.0, 0.0]);
-//	grid.scale([1.03, 1.03, 1.03]); 
 
 	//floor
 	grid = createPlane(name, color);
 	parent.attachChild(grid);
 	grid.translate([-0.5, -0.5, -0.5]);
 	grid.rotate(90, [1.0, 0.0, 0.0]);
-//	grid.scale([1.0, 1.0, 1.0]); 
 
 	return parent;
        	
