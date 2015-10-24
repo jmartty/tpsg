@@ -44,37 +44,43 @@ function main() {
     sceneRoot = new SceneRoot();
 
     // Creacion de instancias de modelos
-    createWheel("rueda", sceneRoot);
+    foo = new ExtrusionSurface();
+    foo.create("foo", "lighting");
+    foo.setupModelData([[0.1, 0.1], [-0.1, 0.1], [-0.1, -0.1], [0.1, -0.1]],
+                       [[0.7, 0.7], [-0.7, 0.7], [-0.7, -0.7], [0.7, -0.7]],
+                       [0.0, 0.0, 1.0],
+                      function(u){ return [2*u, Math.sin(u*Math.PI*2), 0]; },
+                      function(u){ return [2, Math.cos(u*Math.PI*2), 0]; },
+                      100);
+    //foo.draw_mode = gl.LINE_STRIP;
+    foo.setupIndexBuffer();
+    foo.setupGLBuffers();
     
-    // Dibujamos los ejes
-    // Los agrupamos en un nodo virtual
-    axes = new SceneNode();
-    axes.create("axes", null);
-    sceneRoot.attachChild(axes);
-    // Un escalado para mostrar que se funciona
-    axes.scale([2.0, 2.0, 0.5]);
+    // Construimos la escena
+    sceneRoot.attachChild(foo);
 
+    // Dibujamos los ejes
     axis_x = new Curve();
     axis_x.create("x", "default");
     axis_x.setupModelData(function(u){ return [u, 0, 0]; }, 2);
     axis_x.setupIndexBuffer();
     axis_x.setupGLBuffers();
-    axes.attachChild(axis_x);
+    sceneRoot.attachChild(axis_x);
 
     axis_y = new Curve();
     axis_y.create("y", "default");
     axis_y.setupModelData(function(u){ return [0, u, 0]; }, 2);
     axis_y.setupIndexBuffer();
     axis_y.setupGLBuffers();
-    axes.attachChild(axis_y);
+    sceneRoot.attachChild(axis_y);
     
     axis_z = new Curve();
     axis_z.create("z", "default");
     axis_z.setupModelData(function(u){ return [0, 0, u]; }, 2);
     axis_z.setupIndexBuffer();
     axis_z.setupGLBuffers();
-    axes.attachChild(axis_z);
-
+    sceneRoot.attachChild(axis_z);
+    
     // Draw
     //drawScene();
     requestAnimationFrame(drawScene);
@@ -85,7 +91,7 @@ function main() {
 function drawScene() {
     requestAnimationFrame(drawScene);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  //  foo.reset();
-  //  foo.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
+    foo.reset();
+    foo.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
     sceneRoot.draw();
 }
