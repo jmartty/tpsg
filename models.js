@@ -1,3 +1,12 @@
+var blue = [ 0, 0, 1 ];
+var red = [ 1, 0, 0 ];
+var darkgreen = [ 0.5, 0.5, 0 ];
+var green = [ 0, 1, 0.5 ];
+var grey = [ 0.5, 0.5, 0.5 ];
+var yellow = [ 1, 1, 0 ];
+var orange = [ 1, 0.6, 0 ];
+var pink = [ 1, 0.3, 0.7 ];
+
 function createCylinder(name, color) {
 	var cylinder = new Cylinder();
 	cylinder.create(name, "lighting");
@@ -7,10 +16,10 @@ function createCylinder(name, color) {
 	return cylinder;
 }
 
-function createGrid(name, color) {
+function createPlane(name, color) {
 	var grid = new Grid();
 	grid.create(name, "lighting");
-	grid.setupModelData(40, 40, color);
+	grid.setupModelData(2, 2, color);
 	grid.setupIndexBuffer();
 	grid.setupGLBuffers();
 	return grid;
@@ -18,7 +27,7 @@ function createGrid(name, color) {
 
 //rueda de la vuelta al mundo
 function createWheel(name, parent) {
-	var color = [ 0, 0, 0.5 ];
+	var color = grey;
 	var cylinder;
 	var i;
 	for (i=0; i<15 ; i++) {
@@ -46,8 +55,8 @@ function createWheel(name, parent) {
 	return parent;
 }
 
-function createWheelBoxSet(name, parent) {
-	var color = [ 0, 0, 0.5 ];
+function createWheelSet(name, parent) {
+	var color = grey;
 	//cilindo central
 	var centralCylinder = createCylinder(name+"CentralCylinder", color);
 	parent.attachChild(centralCylinder);
@@ -86,6 +95,24 @@ function createWheelBoxSet(name, parent) {
 	return parent;	
 }
 
+function createBoxSet(name, parent) {
+	var i;
+	var box;
+	var boxcolors = [ blue, green, orange, pink, yellow, red,  darkgreen ];
+	for (i=0; i<1 ; i++) {
+		box = createBox(name+"Box"+i, parent, boxcolors[i]);
+		parent.attachChild(box);
+	
+	//	box.rotate(i*48, [0.0, 1.0, 0.0]);
+	//	box.translate([2.0*i, 0, 0]);
+
+		box.scale([0.2, 0.2, 0.2]);
+	}
+	return parent;
+
+}
+	
+
 function createBox(name, parent, color) {
 	//front face
 	var face = new SceneNode();
@@ -122,14 +149,14 @@ function createBox(name, parent, color) {
 //	face.scale([1.03, 1.03, 1.03]); 
 
 	//roof
-	var grid = createGrid(name, color);
+	var grid = createPlane(name, color);
 	parent.attachChild(grid);
 	grid.translate([-0.5, 1.5, -0.5]);
 	grid.rotate(90, [1.0, 0.0, 0.0]);
 //	grid.scale([1.03, 1.03, 1.03]); 
 
 	//floor
-	grid = createGrid(name, color);
+	grid = createPlane(name, color);
 	parent.attachChild(grid);
 	grid.translate([-0.5, -0.5, -0.5]);
 	grid.rotate(90, [1.0, 0.0, 0.0]);
@@ -141,23 +168,23 @@ function createBox(name, parent, color) {
 
 function createBoxFace(name, parent, color) {
 	//main grid
-	var grid = createGrid(name, color);
+	var grid = createPlane(name, color);
 	parent.attachChild(grid);
 
 	//left grid
-	grid = createGrid(name, color);
+	grid = createPlane(name, color);
 	parent.attachChild(grid);
 	grid.translate([0.0, 1, 0.0]);
 	grid.scale([0.2, 1, 1]); 
 
 	//right grid
-	grid = createGrid(name, color);
+	grid = createPlane(name, color);
 	parent.attachChild(grid);
 	grid.translate([0.8, 1, 0.0]);
 	grid.scale([0.2, 1, 1]); 
 
 	//top grid
-	grid = createGrid(name, color);
+	grid = createPlane(name, color);
 	parent.attachChild(grid);
 	grid.translate([0, 1.8, 0.0]);
 	grid.scale([1, 0.2, 1]); 

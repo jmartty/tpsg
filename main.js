@@ -45,22 +45,49 @@ function main() {
     sceneRoot = new SceneRoot();
 
     // Creacion de instancias de modelos
-   /* wheelSet = new SceneNode();
+  /*  wheelSet = new SceneNode();
     wheelSet.create("wheelSet", null);
-    createWheelBoxSet("ruedaquegira", wheelSet);
+    createWheelSet("ruedaquegira", wheelSet);
     sceneRoot.attachChild(wheelSet);
 */
-    var color = [ 1.0, 0, 0 ];	
+ 
+/*  var color = [ 1.0, 0, 0 ];	
     box = new SceneNode();
     box.create("cara", null);
     createBox("caraloca", box, color);
     sceneRoot.attachChild(box);
-  
+  */
+
+    boxSet = new SceneNode();
+    boxSet.create("cajas", null);
+    createBoxSet("cajaslocas", boxSet);
+    sceneRoot.attachChild(boxSet);
+
+
     // Dibujamos los ejes
-    // Los agrupamos en un nodo virtual
+    drawAxes(sceneRoot);
+
+    // Draw
+    //drawScene();
+    requestAnimationFrame(drawScene);
+
+}
+
+// Funcion general de dibujado
+function drawScene() {
+    requestAnimationFrame(drawScene);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+   //box.reset();
+   // box.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
+   //box.rotate(tick, [0, 1, 0]);
+   tick += 0.5;
+    sceneRoot.draw();
+}
+
+function drawAxes(parent) {
     axes = new SceneNode();
     axes.create("axes", null);
-    sceneRoot.attachChild(axes);
+    parent.attachChild(axes);
     // Un escalado para mostrar que se funciona
     axes.scale([2.0, 2.0, 0.5]);
 
@@ -84,20 +111,4 @@ function main() {
     axis_z.setupIndexBuffer();
     axis_z.setupGLBuffers();
     axes.attachChild(axis_z);
-
-    // Draw
-    //drawScene();
-    requestAnimationFrame(drawScene);
-
-}
-
-// Funcion general de dibujado
-function drawScene() {
-    requestAnimationFrame(drawScene);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-   box.reset();
-    box.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
-   box.rotate(tick, [0, 1, 0]);
-   tick += 0.5;
-    sceneRoot.draw();
 }
