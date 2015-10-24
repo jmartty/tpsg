@@ -45,11 +45,16 @@ function main() {
     sceneRoot = new SceneRoot();
 
     // Creacion de instancias de modelos
-    wheelSet = new SceneNode();
+   /* wheelSet = new SceneNode();
     wheelSet.create("wheelSet", null);
     createWheelBoxSet("ruedaquegira", wheelSet);
     sceneRoot.attachChild(wheelSet);
-
+*/
+    var color = [ 1.0, 0, 0 ];	
+    box = new SceneNode();
+    box.create("cara", null);
+    createBox("caraloca", box, color);
+    sceneRoot.attachChild(box);
   
     // Dibujamos los ejes
     // Los agrupamos en un nodo virtual
@@ -90,9 +95,9 @@ function main() {
 function drawScene() {
     requestAnimationFrame(drawScene);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    wheelSet.reset();
-    //wheel.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
-    wheelSet.rotate(tick, [0, 1, 0]);
-    tick += 0.5;
+   box.reset();
+    box.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
+   box.rotate(tick, [0, 1, 0]);
+   tick += 0.5;
     sceneRoot.draw();
 }

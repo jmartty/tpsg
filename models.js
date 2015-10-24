@@ -7,6 +7,15 @@ function createCylinder(name, color) {
 	return cylinder;
 }
 
+function createGrid(name, color) {
+	var grid = new Grid();
+	grid.create(name, "lighting");
+	grid.setupModelData(40, 40, color);
+	grid.setupIndexBuffer();
+	grid.setupGLBuffers();
+	return grid;
+}
+
 //rueda de la vuelta al mundo
 function createWheel(name, parent) {
 	var color = [ 0, 0, 0.5 ];
@@ -69,14 +78,91 @@ function createWheelBoxSet(name, parent) {
 		joint = createCylinder(name+"Joint"+i, color);
 		parent.attachChild(joint);
 		joint.rotate(i*24, [0.0, 1.0, 0.0]);
-
 		joint.translate([2.0, 0.4, -0.4]);
 		joint.rotate(90, [1.0, 0.0, 0.0]);
 		joint.scale([0.1, 0.1, 0.8]);
 	}
 
 	return parent;	
+}
 
+function createBox(name, parent, color) {
+	//front face
+	var face = new SceneNode();
+	face.create("frontface", null);
+	createBoxFace("frontalface", face, color);
+	parent.attachChild(face);
+	face.translate([-0.5, -0.5, 0.5]);
+	face.scale([1.03, 1.03, 1.03]); 
+
+	//back face
+	face = new SceneNode();
+	face.create("backface", null);
+	createBoxFace("backcara", face, color);
+	parent.attachChild(face);
+	face.translate([-0.5, -0.5, -0.5]);
+	face.scale([1.03, 1.03, 1.03]); 
+
+	//side face
+	face = new SceneNode();
+	face.create("sidef", null);
+	createBoxFace("sideface", face, color);
+	parent.attachChild(face);
+	face.rotate(90, [0.0, 1.0, 0.0]);
+	face.translate([-0.5, -0.5, -0.5]);
+	face.scale([1.03, 1.03, 1.03]); 
+
+	//other side face
+	face = new SceneNode();
+	face.create("sideleft", null);
+	createBoxFace("sifeleface", face, color);
+	parent.attachChild(face);
+	face.rotate(-90, [0.0, 1.0, 0.0]);
+	face.translate([-0.5, -0.5, -0.5]);
+	face.scale([1.03, 1.03, 1.03]); 
+
+	//roof
+	var grid = createGrid(name, color);
+	parent.attachChild(grid);
+	grid.translate([-0.5, 1.52, -0.5]);
+	grid.rotate(90, [1.0, 0.0, 0.0]);
+	grid.scale([1.03, 1.03, 1.03]); 
+
+	//floor
+	grid = createGrid(name, color);
+	parent.attachChild(grid);
+	grid.translate([-0.5, -0.5, -0.5]);
+	grid.rotate(90, [1.0, 0.0, 0.0]);
+	grid.scale([1.03, 1.03, 1.03]); 
+
+	return parent;
+       	
+}
+
+function createBoxFace(name, parent, color) {
+	//main grid
+	var grid = createGrid(name, color);
+	parent.attachChild(grid);
+
+	//left grid
+	grid = createGrid(name, color);
+	parent.attachChild(grid);
+	grid.translate([0.0, 0.95, 0.0]);
+	grid.scale([0.2, 1, 1]); 
+
+	//right grid
+	grid = createGrid(name, color);
+	parent.attachChild(grid);
+	grid.translate([0.78, 0.95, 0.0]);
+	grid.scale([0.2, 1, 1]); 
+
+	//top grid
+	grid = createGrid(name, color);
+	parent.attachChild(grid);
+	grid.translate([0, 1.78, 0.0]);
+	grid.scale([1, 0.2, 1]); 
+	
+	return parent;
 }
 
 
