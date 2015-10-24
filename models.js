@@ -9,7 +9,7 @@ function createCylinder(name, color) {
 
 //rueda de la vuelta al mundo
 function createWheel(name, parent) {
-	var color = [ 0, 0, 0.5 ];
+	var color = [ 0, 0, 0.1 ];
 	var cylinder;
 	var i;
 	for (i=0; i<15 ; i++) {
