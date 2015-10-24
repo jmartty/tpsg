@@ -4,6 +4,7 @@ var gl = null;
 var canvas = null;
 var programManager = null;
 var tick = 0;
+
 // Funcion para inicializar el contexto webGL
 function setupWebGL() {
     // Setup canvas
@@ -43,12 +44,13 @@ function main() {
     // Setup de la escena
     sceneRoot = new SceneRoot();
 
-    wheel = new SceneNode();
-    wheel.create("wheel", null);
     // Creacion de instancias de modelos
-    createWheel("rueda", wheel);
-    sceneRoot.attachChild(wheel);
-    
+    wheelSet = new SceneNode();
+    wheelSet.create("wheelSet", null);
+    createWheelBoxSet("ruedaquegira", wheelSet);
+    sceneRoot.attachChild(wheelSet);
+
+  
     // Dibujamos los ejes
     // Los agrupamos en un nodo virtual
     axes = new SceneNode();
@@ -88,10 +90,9 @@ function main() {
 function drawScene() {
     requestAnimationFrame(drawScene);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    wheel.reset();
+    wheelSet.reset();
     //wheel.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
-    wheel.scale([0.5, 25, 0.5]);
-    wheel.rotate(tick, [0, 1, 0]);
+    wheelSet.rotate(tick, [0, 1, 0]);
     tick += 0.5;
     sceneRoot.draw();
 }
