@@ -97,12 +97,11 @@ function createWheelSet(name, parent) {
 
 //TODOS LOS VAGONES JUNTOS
 function createBoxSet(name, parent) {
-	var i = 0;
+	var i;
+	var box = null;
 	var boxcolors = [ blue, green, orange, pink, yellow, red,  darkgreen ];
-	
-	var box;
 
-	for (i; i<7; i++) {
+	for (i = 0;i < 7;i++) {
 		box = new SceneNode();
 		box.create("box", null);
 		createBox(name+"Box"+i, box, boxcolors[i]);
@@ -110,9 +109,11 @@ function createBoxSet(name, parent) {
 		var boxcolors = [ blue, green, orange, pink, yellow, red,  darkgreen ];
 		
 		box.rotate(i*360/7, [0.0, 1.0, 0.0]);
-		box.translate([2, 0, -1.15]);		
+		box.translate([2, 0, 0]);
+		box.rotate(-i*360/7, [0.0, 1.0, 0.0]);
 		box.rotate(90, [1.0, 0.0, 0.0]);
-		box.scale([0.5, 0.5, 0.5]); 
+		box.scale([0.5, 0.5, 0.5]);
+		box.translate([0.0, -1.5, 0.0]);
 
 	}
 
