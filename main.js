@@ -45,23 +45,17 @@ function main() {
     sceneRoot = new SceneRoot();
 
     // Creacion de instancias de modelos
-    wheelSet = new SceneNode();
+ /*   wheelSet = new SceneNode();
     wheelSet.create("wheelSet", null);
     createWheelSet("ruedaquegira", wheelSet);
     sceneRoot.attachChild(wheelSet);
 
- 
-/*  var color = [ 1.0, 0, 0 ];	
-    box = new SceneNode();
-    box.create("cara", null);
-    createBox("caraloca", box, color);
-    sceneRoot.attachChild(box);
-  */
-
     boxSet = new SceneNode();
     boxSet.create("cajas", null);
     createBoxSet("cajaslocas", boxSet);
-    wheelSet.attachChild(boxSet);
+    wheelSet.attachChild(boxSet); */
+	ferriswheel = new FerrisWheel();
+	ferriswheel.createModel(sceneRoot);
 
 
     // Dibujamos los ejes
@@ -77,10 +71,11 @@ function main() {
 function drawScene() {
     requestAnimationFrame(drawScene);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    wheelSet.reset();
-    wheelSet.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
+  //  wheelSet.reset();
+  //  wheelSet.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
   // wheelSet.rotate(tick, [0, 1, 0]);
    tick += 0.5;
+	ferriswheel.animate(tick);
     sceneRoot.draw();
 }
 

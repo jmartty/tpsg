@@ -25,6 +25,56 @@ function createPlane(name, color) {
 	return grid;
 }
 
+//la vuelta l mundo
+function FerrisWheel() {
+
+	this.wheelSet = null;
+	this.boxSet = null;
+	this.boxes = [];
+
+    this.createModel = function(parent) {
+		this.wheelSet = new SceneNode();
+		this.wheelSet.create("wheelSet", null);
+		createWheelSet("ruedaquegira", this.wheelSet);
+		parent.attachChild(this.wheelSet);
+		
+		var i;
+		var box = null;
+		var boxcolors = [ blue, green, orange, pink, yellow, red,  darkgreen ];
+
+		this.boxSet = new SceneNode();
+		this.boxSet.create("boxSet", null);
+		for (i = 0;i < 7;i++) {
+			box = new SceneNode();
+			box.create("box", null);
+			createBox(name+"Box"+i, box, boxcolors[i]);
+			this.boxSet.attachChild(box);
+			var boxcolors = [ blue, green, orange, pink, yellow, red,  darkgreen ];
+			
+			box.translate([0, 0, -0.75]);
+			box.rotate(12+i*360/7, [0.0, 1.0, 0.0]);
+			box.translate([2, 0, 0]);
+			box.rotate(-(12+i*360/7), [0.0, 1.0, 0.0]);
+			box.rotate(90, [1.0, 0.0, 0.0]);
+			box.scale([0.5, 0.5, 0.5]); 
+			this.boxes.push(box);
+		}
+		
+		this.wheelSet.attachChild(this.boxSet);
+	}
+	
+	this.animate = function(tick) {
+		this.wheelSet.reset();
+		this.wheelSet.rotate(tick, [0, 1, 0]);	
+		
+		var index;
+		for (index=0; index<7; index++) {
+			this.boxes[index].rotate(-tick, [0, 0, 1]);
+		}
+	}
+}
+
+
 //rueda de la vuelta al mundo
 function createWheel(name, parent) {
 	var color = grey;
@@ -96,7 +146,7 @@ function createWheelSet(name, parent) {
 }
 
 //TODOS LOS VAGONES JUNTOS
-function createBoxSet(name, parent) {
+/*function createBoxSet(name, parent) {
 	var i;
 	var box = null;
 	var boxcolors = [ blue, green, orange, pink, yellow, red,  darkgreen ];
@@ -108,18 +158,15 @@ function createBoxSet(name, parent) {
 		parent.attachChild(box);
 		var boxcolors = [ blue, green, orange, pink, yellow, red,  darkgreen ];
 		
-		box.rotate(i*360/7, [0.0, 1.0, 0.0]);
+		box.translate([0, 0, -0.75]);
+		box.rotate(12+i*360/7, [0.0, 1.0, 0.0]);
 		box.translate([2, 0, 0]);
-		box.rotate(-i*360/7, [0.0, 1.0, 0.0]);
+		box.rotate(-(12+i*360/7), [0.0, 1.0, 0.0]);
 		box.rotate(90, [1.0, 0.0, 0.0]);
-		box.scale([0.5, 0.5, 0.5]);
-		box.translate([0.0, -1.5, 0.0]);
-
+		box.scale([0.5, 0.5, 0.5]); 
 	}
-
 	return parent;
-
-}
+}*/
 	
 //VAGON DE VUELTA AL MUNDO
 function createBox(name, parent, color) {
