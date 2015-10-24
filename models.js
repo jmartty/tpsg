@@ -93,7 +93,7 @@ function createBox(name, parent, color) {
 	createBoxFace("frontalface", face, color);
 	parent.attachChild(face);
 	face.translate([-0.5, -0.5, 0.5]);
-	face.scale([1.03, 1.03, 1.03]); 
+//	face.scale([1.03, 1.03, 1.03]); 
 
 	//back face
 	face = new SceneNode();
@@ -101,7 +101,7 @@ function createBox(name, parent, color) {
 	createBoxFace("backcara", face, color);
 	parent.attachChild(face);
 	face.translate([-0.5, -0.5, -0.5]);
-	face.scale([1.03, 1.03, 1.03]); 
+//	face.scale([1.03, 1.03, 1.03]); 
 
 	//side face
 	face = new SceneNode();
@@ -110,7 +110,7 @@ function createBox(name, parent, color) {
 	parent.attachChild(face);
 	face.rotate(90, [0.0, 1.0, 0.0]);
 	face.translate([-0.5, -0.5, -0.5]);
-	face.scale([1.03, 1.03, 1.03]); 
+//	face.scale([1.03, 1.03, 1.03]); 
 
 	//other side face
 	face = new SceneNode();
@@ -119,21 +119,21 @@ function createBox(name, parent, color) {
 	parent.attachChild(face);
 	face.rotate(-90, [0.0, 1.0, 0.0]);
 	face.translate([-0.5, -0.5, -0.5]);
-	face.scale([1.03, 1.03, 1.03]); 
+//	face.scale([1.03, 1.03, 1.03]); 
 
 	//roof
 	var grid = createGrid(name, color);
 	parent.attachChild(grid);
-	grid.translate([-0.5, 1.52, -0.5]);
+	grid.translate([-0.5, 1.5, -0.5]);
 	grid.rotate(90, [1.0, 0.0, 0.0]);
-	grid.scale([1.03, 1.03, 1.03]); 
+//	grid.scale([1.03, 1.03, 1.03]); 
 
 	//floor
 	grid = createGrid(name, color);
 	parent.attachChild(grid);
 	grid.translate([-0.5, -0.5, -0.5]);
 	grid.rotate(90, [1.0, 0.0, 0.0]);
-	grid.scale([1.03, 1.03, 1.03]); 
+//	grid.scale([1.0, 1.0, 1.0]); 
 
 	return parent;
        	
@@ -147,19 +147,19 @@ function createBoxFace(name, parent, color) {
 	//left grid
 	grid = createGrid(name, color);
 	parent.attachChild(grid);
-	grid.translate([0.0, 0.95, 0.0]);
+	grid.translate([0.0, 1, 0.0]);
 	grid.scale([0.2, 1, 1]); 
 
 	//right grid
 	grid = createGrid(name, color);
 	parent.attachChild(grid);
-	grid.translate([0.78, 0.95, 0.0]);
+	grid.translate([0.8, 1, 0.0]);
 	grid.scale([0.2, 1, 1]); 
 
 	//top grid
 	grid = createGrid(name, color);
 	parent.attachChild(grid);
-	grid.translate([0, 1.78, 0.0]);
+	grid.translate([0, 1.8, 0.0]);
 	grid.scale([1, 0.2, 1]); 
 	
 	return parent;
