@@ -49,12 +49,12 @@ function FerrisWheel() {
 			box.create("box", null);
 			createBox(name+"Box"+i, box, boxcolors[i]);
 			this.boxSet.attachChild(box);			
-			box.translate([0, 0, -0.75]);
+			box.translate([0, 0, -0.60]);
 			box.rotate(12+i*360/7, [0.0, 1.0, 0.0]);
 			box.translate([2, 0, 0]);
 			box.rotate(-(12+i*360/7), [0.0, 1.0, 0.0]);
 			box.rotate(90, [1.0, 0.0, 0.0]);
-			box.scale([0.5, 0.5, 0.5]); 
+			box.scale([0.4, 0.4, 0.4]); 
 			this.boxes.push(box);
 		}
 		
@@ -68,20 +68,17 @@ function FerrisWheel() {
 		var i;
 		for (i=0; i<7; i++) {
 			this.boxes[i].reset();
-			
 			//reescribo las transf
 			this.boxes[i].rotate(-tick, [0, 1, 0]);
-			this.boxes[i].translate([0, 0, -0.75]);
+			this.boxes[i].translate([0, 0, -0.60]);
 			this.boxes[i].rotate(12+i*360/7+tick, [0.0, 1.0, 0.0]);
 			this.boxes[i].translate([2, 0, 0]);
 			this.boxes[i].rotate(-(12+i*360/7+tick), [0.0, 1.0, 0.0]);
 			this.boxes[i].rotate(90, [1.0, 0.0, 0.0]);
-			this.boxes[i].scale([0.5, 0.5, 0.5]); 
-
+			this.boxes[i].scale([0.4, 0.4, 0.4]); 
 		}
 	}
 }
-
 
 
 //rueda de la vuelta al mundo
@@ -153,29 +150,6 @@ function createWheelSet(name, parent) {
 
 	return parent;	
 }
-
-//TODOS LOS VAGONES JUNTOS
-/*function createBoxSet(name, parent) {
-	var i;
-	var box = null;
-	var boxcolors = [ blue, green, orange, pink, yellow, red,  darkgreen ];
-
-	for (i = 0;i < 7;i++) {
-		box = new SceneNode();
-		box.create("box", null);
-		createBox(name+"Box"+i, box, boxcolors[i]);
-		parent.attachChild(box);
-		var boxcolors = [ blue, green, orange, pink, yellow, red,  darkgreen ];
-		
-		box.translate([0, 0, -0.75]);
-		box.rotate(12+i*360/7, [0.0, 1.0, 0.0]);
-		box.translate([2, 0, 0]);
-		box.rotate(-(12+i*360/7), [0.0, 1.0, 0.0]);
-		box.rotate(90, [1.0, 0.0, 0.0]);
-		box.scale([0.5, 0.5, 0.5]); 
-	}
-	return parent;
-}*/
 	
 //VAGON DE VUELTA AL MUNDO
 function createBox(name, parent, color) {
