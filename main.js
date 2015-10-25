@@ -44,20 +44,18 @@ function main() {
     // Setup de la escena
     sceneRoot = new SceneRoot();
 
-    // Creacion de instancias de modelos
- /*   wheelSet = new SceneNode();
-    wheelSet.create("wheelSet", null);
-    createWheelSet("ruedaquegira", wheelSet);
-    sceneRoot.attachChild(wheelSet);
 
-    boxSet = new SceneNode();
-    boxSet.create("cajas", null);
-    createBoxSet("cajaslocas", boxSet);
-    wheelSet.attachChild(boxSet); */
 	ferriswheel = new FerrisWheel();
 	ferriswheel.createModel(sceneRoot);
 
 
+   /* shape = new Poligon();
+    shape.create("foo", "lighting");
+	shape.setupModelData([[0, 0], [1, 0], [1, 1]], [0.0, 0.0, 1.0]);
+	shape.setupIndexBuffer();
+	shape.setupGLBuffers();
+    sceneRoot.attachChild(shape);
+ */
     // Dibujamos los ejes
     drawAxes(sceneRoot);
 
@@ -106,4 +104,23 @@ function drawAxes(parent) {
     axis_z.setupIndexBuffer();
     axis_z.setupGLBuffers();
     axes.attachChild(axis_z);
+<<<<<<< HEAD
+=======
+
+    // Draw
+    drawScene();
+    //requestAnimationFrame(drawScene);
+
+}
+
+// Funcion general de dibujado
+function drawScene() {
+    requestAnimationFrame(drawScene);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	shape.reset();
+    shape.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
+	shape.rotate(tick, [0, 1, 0]);
+	tick += 0.5;
+    sceneRoot.draw();
+>>>>>>> 2c809d073b81e9041ec3aeb1a4ad56fd9ac6d2af
 }

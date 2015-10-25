@@ -365,6 +365,47 @@ Grid.prototype.setupIndexBuffer = function() {
     }
 }
 
+// Poligono plano de n esquinas
+// Toma los n vertices [(x,y), ... n] en el plano Z
+Poligon = function() { }
+Poligon.prototype = new SceneNode();
+
+Poligon.prototype.setupModelData = function(verts, color) {
+
+    this.position_buffer = [];
+    this.normal_buffer = [];
+    this.color_buffer = [];
+
+    for (i = 0.0;i < verts.length; i++) {
+		// Para cada vértice definimos su posición
+		// Plano
+		this.position_buffer.push(verts[i][0]);
+		this.position_buffer.push(verts[i][1]);
+		this.position_buffer.push(0.0);
+		
+		this.normal_buffer.push(0.0);
+		this.normal_buffer.push(0.0);
+		this.normal_buffer.push(1.0);
+
+		// Para cada vértice definimos su color
+		this.color_buffer.push(color[0]);
+		this.color_buffer.push(color[1]);
+		this.color_buffer.push(color[2]);
+
+    };
+	
+	this.draw_mode = gl.TRIANGLE_FAN;
+	
+}
+
+Poligon.prototype.setupIndexBuffer = function() {
+    this.index_buffer = [];
+    for(i = 0; i < this.position_buffer.length/3; i++) {
+		this.index_buffer.push(i);
+    }
+}
+
+
 // Cilindro
 Cylinder = function() { }
 Cylinder.prototype = new Grid();
