@@ -148,11 +148,14 @@ function createWheelSet(name, parent, color) {
 	centralCylinder.translate([0.0, 0.0, -0.7]);
 	centralCylinder.scale([0.3, 0.3, 1.4]);
 	
+	//tapas del cilindro central
 	var circulo = createCircle("circulo", color  );	
 	parent.attachChild(circulo);
 	circulo.translate([0.0, 0.7, 0]);
 	circulo.rotate(90, [1.0, 0.0, 0.0]);
 	circulo.scale([0.3, 0.3, 0]);
+	circulo.scale([1, 1, -1]); 
+
 	
 	circulo = createCircle("circulo", color  );	
 	parent.attachChild(circulo);
@@ -204,6 +207,7 @@ function createBox(name, parent, color) {
 	createBoxFace("backcara", face, color);
 	parent.attachChild(face);
 	face.translate([-0.5, -0.5, -0.5]);
+	face.scale([1, 1, -1]); 
 
 	//side face
 	face = new SceneNode();
@@ -212,6 +216,7 @@ function createBox(name, parent, color) {
 	parent.attachChild(face);
 	face.rotate(90, [0.0, 1.0, 0.0]);
 	face.translate([-0.5, -0.5, -0.5]);
+	face.scale([1, 1, -1]); 
 
 	//other side face
 	face = new SceneNode();
@@ -220,12 +225,15 @@ function createBox(name, parent, color) {
 	parent.attachChild(face);
 	face.rotate(-90, [0.0, 1.0, 0.0]);
 	face.translate([-0.5, -0.5, -0.5]);
+	face.scale([1, 1, -1]); 
 
 	//roof
 	var grid = createPlane(name, color);
 	parent.attachChild(grid);
 	grid.translate([-0.5, 1.5, -0.5]);
 	grid.rotate(90, [1.0, 0.0, 0.0]);
+	grid.scale([1, 1, -1]); 
+
 
 	//floor
 	grid = createPlane(name, color);
@@ -291,6 +299,7 @@ function createPilar(name, parent, color) {
 	parent.attachChild(shape);
 	shape.translate([0, 0.05, 0.0]);
 	shape.rotate(90, [1.0, 0.0, 0.0]);
+	shape.scale([1, 1, -1]); 
 	
 	//cara trasera
 	shape = createFigure("backfacepilar", positions, color);
@@ -317,6 +326,7 @@ function createPilar(name, parent, color) {
 	grid.rotate(90, [1.0, 0.0, 0.0]);
 	grid.translate([-0.05, 0, 0.0]);
 	grid.scale([0.1, 3.255, 1]); 
+	grid.scale([1, 1, -1]); 
 	
 	//tapa superior
 	grid = createPlane("topface", color);
