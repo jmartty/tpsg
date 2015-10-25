@@ -48,9 +48,7 @@ function FerrisWheel() {
 			box = new SceneNode();
 			box.create("box", null);
 			createBox(name+"Box"+i, box, boxcolors[i]);
-			this.boxSet.attachChild(box);
-			var boxcolors = [ blue, green, orange, pink, yellow, red,  darkgreen ];
-			
+			this.boxSet.attachChild(box);			
 			box.translate([0, 0, -0.75]);
 			box.rotate(12+i*360/7, [0.0, 1.0, 0.0]);
 			box.translate([2, 0, 0]);
@@ -67,12 +65,23 @@ function FerrisWheel() {
 		this.wheelSet.reset();
 		this.wheelSet.rotate(tick, [0, 1, 0]);	
 		
-		var index;
-		for (index=0; index<7; index++) {
-			this.boxes[index].rotate(-tick, [0, 0, 1]);
+		var i;
+		for (i=0; i<7; i++) {
+			this.boxes[i].reset();
+			
+			//reescribo las transf
+			this.boxes[i].translate([0, 0, -0.75]);
+			this.boxes[i].rotate(12+i*360/7, [0.0, 1.0, 0.0]);
+			this.boxes[i].translate([2, 0, 0]);
+									this.boxes[i].rotate(-tick, [0, 1, 0]);
+			this.boxes[i].rotate(-(12+i*360/7), [0.0, 1.0, 0.0]);
+			this.boxes[i].rotate(90, [1.0, 0.0, 0.0]);
+			this.boxes[i].scale([0.5, 0.5, 0.5]); 
+
 		}
 	}
 }
+
 
 
 //rueda de la vuelta al mundo
