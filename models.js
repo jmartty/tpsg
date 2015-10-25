@@ -70,11 +70,11 @@ function FerrisWheel() {
 			this.boxes[i].reset();
 			
 			//reescribo las transf
+			this.boxes[i].rotate(-tick, [0, 1, 0]);
 			this.boxes[i].translate([0, 0, -0.75]);
-			this.boxes[i].rotate(12+i*360/7, [0.0, 1.0, 0.0]);
+			this.boxes[i].rotate(12+i*360/7+tick, [0.0, 1.0, 0.0]);
 			this.boxes[i].translate([2, 0, 0]);
-									this.boxes[i].rotate(-tick, [0, 1, 0]);
-			this.boxes[i].rotate(-(12+i*360/7), [0.0, 1.0, 0.0]);
+			this.boxes[i].rotate(-(12+i*360/7+tick), [0.0, 1.0, 0.0]);
 			this.boxes[i].rotate(90, [1.0, 0.0, 0.0]);
 			this.boxes[i].scale([0.5, 0.5, 0.5]); 
 
