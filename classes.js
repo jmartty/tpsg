@@ -550,9 +550,9 @@ Circle.prototype.setupModelData = function(steps, color) {
     this.normal_buffer.push(0.0);
     this.normal_buffer.push(1.0);
     
-    this.color_buffer.push(1.0);
-    this.color_buffer.push(0.0);
-    this.color_buffer.push(0.0);
+    this.color_buffer.push(color[0]);
+    this.color_buffer.push(color[1]);
+    this.color_buffer.push(color[2]);
     
     // Edges
     for (j = 0.0;j < this.steps; j++) {

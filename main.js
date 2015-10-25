@@ -43,19 +43,13 @@ function main() {
 
     // Setup de la escena
     sceneRoot = new SceneRoot();
-
-
+	
 	ferriswheel = new FerrisWheel();
-	ferriswheel.createModel(sceneRoot);
-
-
-   /* shape = new Poligon();
-    shape.create("foo", "lighting");
-	shape.setupModelData([[0, 0], [1, 0], [1, 1]], [0.0, 0.0, 1.0]);
-	shape.setupIndexBuffer();
-	shape.setupGLBuffers();
-    sceneRoot.attachChild(shape);
- */
+	vueltamundo = new SceneNode();
+	vueltamundo.create("vuelta",null);
+	ferriswheel.createModel(vueltamundo);
+	sceneRoot.attachChild(vueltamundo);
+	
     // Dibujamos los ejes
     drawAxes(sceneRoot);
 
@@ -63,18 +57,6 @@ function main() {
     //drawScene();
     requestAnimationFrame(drawScene);
 
-}
-
-// Funcion general de dibujado
-function drawScene() {
-    requestAnimationFrame(drawScene);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  //  wheelSet.reset();
-  //  wheelSet.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
-  // wheelSet.rotate(tick, [0, 1, 0]);
-   tick += 0.5;
-	ferriswheel.animate(tick);
-    sceneRoot.draw();
 }
 
 function drawAxes(parent) {
@@ -116,11 +98,12 @@ function drawAxes(parent) {
 function drawScene() {
     requestAnimationFrame(drawScene);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-	
-/*	shape.reset();
-    shape.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
-	shape.rotate(tick, [0, 1, 0]);
-*/	
+
+	vueltamundo.reset();
+	vueltamundo.scale([0.5, 0.5, 0.5]); 
+	vueltamundo.translate([0.5, 0.5, -0.5]);
+
+    vueltamundo.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
 	tick += 0.5;
 	ferriswheel.animate(tick);
     sceneRoot.draw();

@@ -18,30 +18,57 @@ function createCylinder(name, color) {
 
 function createPlane(name, color) {
 	var grid = new Grid();
-	grid.create(name, "default");
+	grid.create(name, "lighting");
 	grid.setupModelData(2, 2, color);
 	grid.setupIndexBuffer();
 	grid.setupGLBuffers();
 	return grid;
 }
 
+function createFigure(name, positions, color) {
+	var shape = new Poligon();
+    shape.create("name", "lighting");
+	shape.setupModelData(positions, color);
+	shape.setupIndexBuffer();
+	shape.setupGLBuffers();
+	return shape;
+}
+
+function createCircle(name, color) {
+	var circle = new Circle();
+	circle.create(name, "lighting");
+	circle.setupModelData(50, color);
+	circle.setupIndexBuffer();
+	circle.setupGLBuffers();
+	return circle;
+}
+
 //la vuelta l mundo
 function FerrisWheel() {
-
 	this.wheelSet = null;
 	this.boxSet = null;
 	this.boxes = [];
+	this.pilarSet = null;
+	this.color = grey;
 
     this.createModel = function(parent) {
+		//creacion de los soprtes
+		this.pilarSet = new SceneNode();
+		this.pilarSet.create("wheelSet", null);
+		createPilarSet("setpilar", this.pilarSet, this.color);
+		parent.attachChild(this.pilarSet);
+	
+		//creacion de las ruedas
 		this.wheelSet = new SceneNode();
 		this.wheelSet.create("wheelSet", null);
-		createWheelSet("ruedaquegira", this.wheelSet);
+		createWheelSet("ruedaquegira", this.wheelSet, this.color);
 		parent.attachChild(this.wheelSet);
 		
 		var i;
 		var box = null;
 		var boxcolors = [ blue, green, orange, pink, yellow, red,  darkgreen ];
 
+		//creacion de carritos
 		this.boxSet = new SceneNode();
 		this.boxSet.create("boxSet", null);
 		for (i = 0;i < 7;i++) {
@@ -57,12 +84,15 @@ function FerrisWheel() {
 			box.scale([0.4, 0.4, 0.4]); 
 			this.boxes.push(box);
 		}
-		
 		this.wheelSet.attachChild(this.boxSet);
+		
+		//corro la rueda a la altura de los soportes
+		this.wheelSet.translate([0, 0, 3]);
 	}
 	
 	this.animate = function(tick) {
 		this.wheelSet.reset();
+		this.wheelSet.translate([0, 0, 3]);
 		this.wheelSet.rotate(tick, [0, 1, 0]);	
 		
 		var i;
@@ -82,8 +112,7 @@ function FerrisWheel() {
 
 
 //rueda de la vuelta al mundo
-function createWheel(name, parent) {
-	var color = grey;
+function createWheel(name, parent, color) {
 	var cylinder;
 	var i;
 	for (i=0; i<14 ; i++) {
@@ -111,29 +140,38 @@ function createWheel(name, parent) {
 	return parent;
 }
 
-function createWheelSet(name, parent) {
-	var color = grey;
+function createWheelSet(name, parent, color) {
 	//cilindo central
 	var centralCylinder = createCylinder(name+"CentralCylinder", color);
 	parent.attachChild(centralCylinder);
 	centralCylinder.rotate(90, [1.0, 0.0, 0.0]);
 	centralCylinder.translate([0.0, 0.0, -0.7]);
 	centralCylinder.scale([0.3, 0.3, 1.4]);
+	
+	var circulo = createCircle("circulo", color  );	
+	parent.attachChild(circulo);
+	circulo.translate([0.0, 0.7, 0]);
+	circulo.rotate(90, [1.0, 0.0, 0.0]);
+	circulo.scale([0.3, 0.3, 0]);
+	
+	circulo = createCircle("circulo", color  );	
+	parent.attachChild(circulo);
+	circulo.translate([0.0, -0.7, 0]);
+	circulo.rotate(90, [1.0, 0.0, 0.0]);
+	circulo.scale([0.3, 0.3, 0]);
 
 	//rueda frontal
 	var wheel = new SceneNode();
-    	wheel.create("wheel", null);
-   	createWheel("rueda", wheel);
+    wheel.create("wheel", null);
+   	createWheel("rueda", wheel, color);
 	wheel.translate([0.0, 0.4, 0.0]);
-    	sceneRoot.attachChild(wheel);
 	parent.attachChild(wheel);
 
 	//rueda de atras
 	wheel = new SceneNode();
 	wheel.create("wheel2", null);
-   	createWheel("rueda2", wheel);
+   	createWheel("rueda2", wheel, color);
 	wheel.translate([0.0, -0.4, 0.0]);
-    	sceneRoot.attachChild(wheel);
 	parent.attachChild(wheel);
 
 	//uniones
@@ -225,4 +263,68 @@ function createBoxFace(name, parent, color) {
 	return parent;
 }
 
+function createPilarSet(name, parent, color) {
+	//rueda frontal
+	var pilar = new SceneNode();
+    pilar.create("pilar", null);
+   	createPilar("pilar", pilar, color);
+	pilar.translate([0.0, 0.6, 0.0]);
+	parent.attachChild(pilar);
+
+	//rueda de atras
+	pilar = new SceneNode();
+    pilar.create("pilar", null);
+   	createPilar("pilar", pilar, color);
+	pilar.translate([0.0, -0.6, 0.0]);
+	parent.attachChild(pilar);
+	
+	return parent;
+}
+
+
+function createPilar(name, parent, color) {
+	//cara frontal
+	var positions = [ [-0.8, 0], [0.8, 0], [0.2, 3.2], [-0.2, 3.2] ] ;
+	var shape;
+
+	shape = createFigure("frontfacepilar", positions, color);
+	parent.attachChild(shape);
+	shape.translate([0, 0.05, 0.0]);
+	shape.rotate(90, [1.0, 0.0, 0.0]);
+	
+	//cara trasera
+	shape = createFigure("backfacepilar", positions, color);
+	parent.attachChild(shape);
+	shape.translate([0, -0.05, 0.0]);
+	shape.rotate(90, [1.0, 0.0, 0.0]);
+	
+	//tapa lateral
+	var grid = createPlane("leftface", color);
+	parent.attachChild(grid);
+	grid.translate([0.8, 0, 0.0]);
+	grid.rotate(-10.65, [0.0, 1.0, 0.0]);
+	grid.rotate(90, [0.0, 0.0, 1.0]);
+	grid.rotate(90, [1.0, 0.0, 0.0]);
+	grid.translate([-0.05, 0, 0.0]);
+	grid.scale([0.1, 3.255, 1]); 
+	
+	//otra tapa lateral
+	grid = createPlane("rigthface", color);
+	parent.attachChild(grid);
+	grid.translate([-0.8, 0, 0.0]);
+	grid.rotate(10.65, [0.0, 1.0, 0.0]);
+	grid.rotate(90, [0.0, 0.0, 1.0]);
+	grid.rotate(90, [1.0, 0.0, 0.0]);
+	grid.translate([-0.05, 0, 0.0]);
+	grid.scale([0.1, 3.255, 1]); 
+	
+	//tapa superior
+	grid = createPlane("topface", color);
+	parent.attachChild(grid);
+	grid.translate([-0.2, -0.05, 3.2]);
+	grid.scale([0.4, 0.1, 1]); 
+
+	return parent;
+	
+}
 
