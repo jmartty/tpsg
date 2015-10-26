@@ -517,8 +517,13 @@ function createDisk(name, parent, color) {
 	
 	var sup = createRevoSurface("hola", color, contorno, derivada);
 	parent.attachChild(sup);
-	sup.scale([2,2,0.3]);
-	sup.scale([3,3,3]);
+	
+	var tapa = createCircle("tapa", color);
+	tapa.translate([0,0,1]);
+	tapa.scale([0.5,0.5,0.5]);
+	sup.attachChild(tapa);
+	sup.scale([6,6,0.9]);
+
 	
 	//creo las sillas alrededor
 	var i = 0;
@@ -543,6 +548,7 @@ function createFlyingChairs(name, parent, color) {
 	columna.create("sup", null);
 	createMainColumn("hola", columna, color);
 	parent.attachChild(columna);
+	columna.scale([1.2,1.2,1]);
 	
 	//disco
 	disco = new SceneNode();

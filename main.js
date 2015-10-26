@@ -55,7 +55,7 @@ function main() {
 
 	objeto = new SceneNode();
 	objeto.create("sup", null);
-	createFlyingChairs("hola", objeto, [1, 1 , 1]);
+	createFlyingChairs("hola", objeto, [1,  0, 0]);
 
 	sceneRoot.attachChild(objeto);
 
