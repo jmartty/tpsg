@@ -44,11 +44,16 @@ function main() {
     // Setup de la escena
     sceneRoot = new SceneRoot();
 	
-	ferriswheel = new FerrisWheel();
+/*	ferriswheel = new FerrisWheel();
 	vueltamundo = new SceneNode();
 	vueltamundo.create("vuelta",null);
 	ferriswheel.createModel(vueltamundo);
 	sceneRoot.attachChild(vueltamundo);
+*/
+	objeto = new SceneNode();
+	objeto.create("silla", null);
+	createCar("silla", objeto, [ 1, 0, 0 ]);
+	sceneRoot.attachChild(objeto);
 	
     // Dibujamos los ejes
     drawAxes(sceneRoot);
@@ -98,13 +103,16 @@ function drawAxes(parent) {
 function drawScene() {
     requestAnimationFrame(drawScene);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	objeto.reset();
+	objeto.scale([3,3,3]);
+    objeto.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
 
-	vueltamundo.reset();
+/*	vueltamundo.reset();
 	vueltamundo.scale([0.5, 0.5, 0.5]); 
 	vueltamundo.translate([0.5, 0.5, -0.5]);
 
     vueltamundo.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
 	tick += 0.5;
-	ferriswheel.animate(tick);
+	ferriswheel.animate(tick); */
     sceneRoot.draw();
 }
