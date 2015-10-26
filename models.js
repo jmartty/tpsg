@@ -43,6 +43,15 @@ function createCircle(name, color) {
 	return circle;
 }
 
+function createRevoSurface(name, color, func, deriv) {
+	var surface = new SurfaceOfRevolution();
+	surface.create(name, "lighting");
+	surface.setupModelData(25, 25, color, func, deriv);
+	surface.setupIndexBuffer();
+	surface.setupGLBuffers();
+	return surface;
+}
+
 //la vuelta l mundo
 function FerrisWheel() {
 	this.wheelSet = null;
@@ -140,6 +149,7 @@ function createWheel(name, parent, color) {
 	return parent;
 }
 
+//par de ruedas de la vuelta al mundo unidas con cilindros
 function createWheelSet(name, parent, color) {
 	//cilindo central
 	var centralCylinder = createCylinder(name+"CentralCylinder", color);
@@ -155,7 +165,6 @@ function createWheelSet(name, parent, color) {
 	circulo.rotate(90, [1.0, 0.0, 0.0]);
 	circulo.scale([0.3, 0.3, 0]);
 	circulo.scale([1, 1, -1]); 
-
 	
 	circulo = createCircle("circulo", color  );	
 	parent.attachChild(circulo);
@@ -245,6 +254,7 @@ function createBox(name, parent, color) {
        	
 }
 
+//cara del vagon 
 function createBoxFace(name, parent, color) {
 	//main grid
 	var grid = createPlane(name, color);
@@ -271,6 +281,7 @@ function createBoxFace(name, parent, color) {
 	return parent;
 }
 
+//par de pilares de la vuelta al mundo
 function createPilarSet(name, parent, color) {
 	//rueda frontal
 	var pilar = new SceneNode();
@@ -289,7 +300,7 @@ function createPilarSet(name, parent, color) {
 	return parent;
 }
 
-
+//pilar de la vuelta al mundo
 function createPilar(name, parent, color) {
 	//cara frontal
 	var positions = [ [-0.8, 0], [0.8, 0], [0.2, 3.2], [-0.2, 3.2] ] ;
@@ -335,8 +346,25 @@ function createPilar(name, parent, color) {
 	grid.scale([0.4, 0.1, 1]); 
 
 	return parent;
-	
 }
+
+//silla
+function createCarChair(name, parent, color) {
+	//asiento
+	var grid = createPlane("asiento", color);
+	parent.attachChild(grid);
+	grid.translate([-0.5, 0.0, 0.0]);
+	
+	//respaldo
+	grid = createPlane("respaldo", color);
+	parent.attachChild(grid);
+	grid.rotate(109.47, [1.0, 0.0, 0.0]);
+	grid.translate([-0.5, 0.0, 0.0]);
+	grid.scale([1, 1, -1]);
+	
+	return parent;
+}
+
 
 // Array clone
 function arrayClone(arr) {
@@ -387,4 +415,103 @@ function createRollerCoaster(parent, spline) {
     
     parent.attachChild(leftRail);
     parent.attachChild(rightRail);
+}
+
+function createCar(name, parent, color) {
+	//panel lateral
+	var positions = [ [0, 0], [-0.25, 0], [-0.25, 0.45], [-0.2, 0.7], [0.0, 0.7] ] ;
+	var shape;
+	shape = createFigure("rightpanel", positions, color);
+	parent.attachChild(shape);
+	shape.translate([0.15, 0.0, 0.0]);
+	shape.rotate(90, [0.0, 1.0, 0.0]);
+	
+	//otro panel lateral
+	shape = createFigure("leftpanel", positions, color);
+	parent.attachChild(shape);
+	shape.translate([-0.15, 0.0, 0.0]);
+	shape.rotate(90, [0.0, 1.0, 0.0]);
+	shape.scale([1, 1, -1]);
+	
+	//piso
+	var grid = createPlane("pisocar", color);
+	parent.attachChild(grid);
+	grid.translate([-0.15, 0.0, 0.0]);
+	grid.scale([0.3, 0.7, -1]);
+	
+	//panel trasero
+	grid = createPlane("backpanelcar", color);
+	parent.attachChild(grid);
+	grid.rotate(90, [1.0, 0.0, 0.0]);
+	grid.translate([-0.15, 0.0, 0.0]);
+	grid.scale([0.3, 0.25, 1]);
+	
+	//panel frontal
+	grid = createPlane("frontpanelcar", color);
+	parent.attachChild(grid);
+	grid.translate([0.0, 0.7, 0.0]);
+	grid.rotate(90, [1.0, 0.0, 0.0]);
+	grid.translate([-0.15, 0.0, 0.0]);
+	grid.scale([0.3, 0.2, -1]);
+	
+	//panel capot 11.53
+	grid = createPlane("frontpanelcar", color);
+	parent.attachChild(grid);
+	grid.translate([0.0, 0.45, 0.25]);
+	grid.rotate(-11.53, [1.0, 0.0, 0.0]);
+	grid.translate([-0.15, 0.0, 0.0]);
+	grid.scale([0.3, 0.252, 1]);
+	
+	//sillas
+	var silla = new SceneNode();
+	silla.create("sillacar", null);
+	createCarChair("silla atras", silla, blue);
+	parent.attachChild(silla);
+	silla.translate([0.0, 0.05, 0.15]);
+	silla.scale([0.3, 0.15, 0.15]);
+	
+	silla = new SceneNode();
+	silla.create("otrasilla", null);
+	createCarChair("silla atras", silla, blue);
+	parent.attachChild(silla);
+	silla.translate([0.0, 0.3, 0.15]);
+	silla.scale([0.3, 0.15, 0.15]);
+	
+}
+
+//columna de flying chairs
+function createMainColumn(name, parent, color) {
+	var contorno = function(s) {
+		if (s<=0.3) {
+			return 1;
+		} else if (s>0.3 && s<= 0.45) {
+			return -(s-0.3)+1; 
+		} else if (s>0.45 && s<= 0.6)  {
+			return 0.85;
+		} else if (s>0.6 && s<= 0.65)  {
+			return -(s-0.45)+1;
+		} else if (s> 0.65 && s<= 1)  {
+			return 0.8;
+		}
+	}
+	
+	var derivada = function(s) {
+		if (s<=0.3) {
+			return 0;
+		} else if (s>0.3 && s<= 0.45) {
+			return -1; 
+		} else if (s>0.45 && s<= 0.6)  {
+			return 0;
+		} else if (s>0.6 && s<= 0.65)  {
+			return -1;
+		} else if (s> 0.65 && s<= 1)  {
+			return 0;
+		}
+	}
+
+	var sup = createRevoSurface("hola", color, contorno, derivada);
+	parent.attachChild(sup);
+	sup.scale([0.3,0.3,1]);
+
+	
 }

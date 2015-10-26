@@ -47,6 +47,19 @@ function main() {
     // Setup de la escena
     sceneRoot = new SceneRoot();
 	
+	ferriswheel = new FerrisWheel();
+	vueltamundo = new SceneNode();
+	vueltamundo.create("vuelta",null);
+	ferriswheel.createModel(vueltamundo);
+	sceneRoot.attachChild(vueltamundo);
+
+	objeto = new SceneNode();
+	objeto.create("sup", null);
+	createMainColumn("hola", objeto, [1, 0 , 0]);
+
+	sceneRoot.attachChild(objeto);
+
+	
     // Dibujamos los ejes
     drawAxes(sceneRoot);
 
@@ -121,11 +134,23 @@ function drawAxes(parent) {
 function drawScene() {
     requestAnimationFrame(drawScene);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	objeto.reset();
+    objeto.translate([0, 2, 0]);
+//	objeto.scale([0.3,0.3,1]);
+    objeto.scale([2,2,2]);
+
+
+	vueltamundo.reset();
+    vueltamundo.translate([1, -6, 0]);
+	//vueltamundo.scale([0.5, 0.5, 0.5]); 
+	tick += 0.5;
 
     // Update camera
     camera.setCamPos(document.getElementById('camposx').value, document.getElementById('camposy').value, document.getElementById('camposz').value);
     camera.setCamDir(document.getElementById('camazi').value, document.getElementById('campolar').value);
     programManager.updateViewMatrix(camera.getViewMatrix());
+
+	ferriswheel.animate(tick); 
 
     sceneRoot.draw();
 }
