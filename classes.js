@@ -644,29 +644,96 @@ SurfaceOfRevolution.prototype.setupModelData = function(cols, rows, color, param
 function Camera() {
     
     // Defaults
-    this.cameraPos = vec3.fromValues(2, 2, 2);
-    this.cameraDirAzi = 45 * Math.PI/180.0;
-    this.cameraDirPolar = -125 * Math.PI/180.0;
+    this.pos = vec3.fromValues(5, 8, 5);
+    this.dirAzi = -115 * Math.PI/180.0;
+    this.dirPolar = 115 * Math.PI/180.0;
     
     // Parametrizacion de la camara
     this.setCamPos = function(x, y, z) {
-        this.cameraPos = vec3.fromValues(x, y, z);
+        this.pos = vec3.fromValues(x, y, z);
     }
     
     // Converts deg to rad
     this.setCamDir = function(azi, polar) {
-        this.cameraDirAzi = azi * Math.PI/180.0;
-        this.cameraDirPolar = polar * Math.PI/180.0;
+        this.dirAzi = azi * Math.PI/180.0;
+        this.dirPolar = polar * Math.PI/180.0;
     }
 
+    this.updateFromDocument = function() {
+        camera.setCamPos(document.getElementById('camposx').value, document.getElementById('camposy').value, document.getElementById('camposz').value);
+        camera.setCamDir(document.getElementById('camazi').value, document.getElementById('campolar').value);
+    }
+    
     this.getViewMatrix = function() {
         var lookat = vec3.create();
         vMatrix = mat4.create();
-        vec3.add(lookat, this.cameraPos, vec3.fromValues(
-            Math.sin(this.cameraDirPolar) * Math.cos(this.cameraDirAzi),
-            Math.sin(this.cameraDirPolar) * Math.sin(this.cameraDirAzi),
-            Math.cos(this.cameraDirPolar)
+        vec3.add(lookat, this.pos, vec3.fromValues(
+            Math.sin(this.dirPolar) * Math.cos(this.dirAzi),
+            Math.sin(this.dirPolar) * Math.sin(this.dirAzi),
+            Math.cos(this.dirPolar)
         ));
-        return mat4.lookAt(vMatrix, this.cameraPos, lookat, [0, 0, 1]);
+        return mat4.lookAt(vMatrix, this.pos, lookat, [0, 0, 1]);
+    }
+
+    // FPSesque cam movements
+    this.moveForward = function() {
+        var dir = vec3.fromValues(
+            Math.sin(this.dirPolar) * Math.cos(this.dirAzi),
+            Math.sin(this.dirPolar) * Math.sin(this.dirAzi),
+            Math.cos(this.dirPolar));
+        vec3.scale(dir, dir, 0.25);
+        vec3.add(this.pos, this.pos, dir);
+    }
+
+    this.moveBackward = function() {
+        var dir = vec3.fromValues(
+            Math.sin(this.dirPolar) * Math.cos(this.dirAzi),
+            Math.sin(this.dirPolar) * Math.sin(this.dirAzi),
+            Math.cos(this.dirPolar));
+        vec3.scale(dir, dir, 0.25);
+        vec3.sub(this.pos, this.pos, dir);
+    }
+
+    this.strafeLeft = function() {
+        var dir = vec3.fromValues(
+            Math.sin(this.dirPolar) * Math.cos(this.dirAzi),
+            Math.sin(this.dirPolar) * Math.sin(this.dirAzi),
+            Math.cos(this.dirPolar));
+        vec3.scale(dir, dir, 0.25);
+        var left = vec3.create();
+        vec3.cross(left, vec3.fromValues(0,0,1), dir);
+        vec3.add(this.pos, this.pos, left);
+    }
+    
+    this.strafeRight = function() {
+        var dir = vec3.fromValues(
+            Math.sin(this.dirPolar) * Math.cos(this.dirAzi),
+            Math.sin(this.dirPolar) * Math.sin(this.dirAzi),
+            Math.cos(this.dirPolar));
+        vec3.scale(dir, dir, 0.25);
+        var right = vec3.create();
+        vec3.cross(right, dir, vec3.fromValues(0,0,1));
+        vec3.add(this.pos, this.pos, right);
+    }
+    
+    this.lookLeft = function() {
+        this.dirAzi += Math.PI/100;
+    }
+
+    this.lookRight = function() {
+        this.dirAzi -= Math.PI/100;
+    }
+
+    this.lookUp = function() {
+        if(this.dirPolar > 0) {
+            this.dirPolar -= Math.PI/100;
+            if(this.dirPolar < 0)
+                this.dirPolar = 0;
+        }
+    }
+
+    this.lookDown = function() {
+        if(this.dirPolar < Math.PI)
+            this.dirPolar += Math.PI/100;
     }
 }

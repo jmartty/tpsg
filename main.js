@@ -144,13 +144,44 @@ function drawScene() {
     vueltamundo.translate([1, -6, 0]);
 	//vueltamundo.scale([0.5, 0.5, 0.5]); 
 	tick += 0.5;
-
-    // Update camera
-    camera.setCamPos(document.getElementById('camposx').value, document.getElementById('camposy').value, document.getElementById('camposz').value);
-    camera.setCamDir(document.getElementById('camazi').value, document.getElementById('campolar').value);
-    programManager.updateViewMatrix(camera.getViewMatrix());
-
 	ferriswheel.animate(tick); 
+    
+    // Update camera from form controls
+    //camera.updateFromDocument();
+    
+    // Update viewmatrix
+    programManager.updateViewMatrix(camera.getViewMatrix());
 
     sceneRoot.draw();
 }
+
+// Controles via teclado
+document.addEventListener('keydown', function(event) {
+    // W
+    if (event.keyCode == 87) {
+        camera.moveForward();
+    // S
+    }else if (event.keyCode == 83) {
+        camera.moveBackward();
+    // Left
+    }else if (event.keyCode == 37) {
+        camera.lookLeft();
+    // A
+    }else if (event.keyCode == 65) {
+        camera.strafeLeft();
+    // D
+    }else if (event.keyCode == 68) {
+        camera.strafeRight();
+    // Right
+    }else if (event.keyCode == 39) {
+        camera.lookRight();
+    // Look up
+    }else if (event.keyCode == 38) {
+        camera.lookUp();
+    // Look down
+    }else if (event.keyCode == 40) {
+        camera.lookDown();
+    }
+
+}, true);
+
