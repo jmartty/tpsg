@@ -43,6 +43,15 @@ function createCircle(name, color) {
 	return circle;
 }
 
+function createRevoSurface(name, color, func, deriv) {
+	var surface = new SurfaceOfRevolution();
+	surface.create(name, "lighting");
+	surface.setupModelData(100, 100, color, func, deriv);
+	surface.setupIndexBuffer();
+	surface.setupGLBuffers();
+	return surface;
+}
+
 //la vuelta l mundo
 function FerrisWheel() {
 	this.wheelSet = null;

@@ -50,10 +50,45 @@ function main() {
 	ferriswheel.createModel(vueltamundo);
 	sceneRoot.attachChild(vueltamundo);
 */
+
+	var x = 0;
+	contorno = function(s) {
+		if (s<=0.3) {
+			return 1-x;
+		} else if (s>0.3 && s<= 0.45) {
+			return -(s-0.3)+1-x; 
+		} else if (s>0.45 && s<= 0.6)  {
+			return 0.85-x;
+		} else if (s>0.6 && s<= 0.65)  {
+			return -(s-0.45)+1-x;
+		} else if (s> 0.65 && s<= 1)  {
+			return 0.8-x;
+		}
+	}
+	
+	derivada = function(s) {
+		if (s<=0.3) {
+			return 0;
+		} else if (s>0.3 && s<= 0.45) {
+			return -1; 
+		} else if (s>0.45 && s<= 0.6)  {
+			return 0;
+		} else if (s>0.6 && s<= 0.65)  {
+			return -1;
+		} else if (s> 0.65 && s<= 1)  {
+			return 0;
+		}
+	}
+
 	objeto = new SceneNode();
-	objeto.create("silla", null);
-	createCar("silla", objeto, [ 1, 0, 0 ]);
+	objeto.create("sup", null);
+	sup = createRevoSurface("hola", [1, 0 , 0], contorno, derivada);
+	//no anda esto?
+//	objeto.scale([2,2,2]);
+	objeto.attachChild(sup);
+
 	sceneRoot.attachChild(objeto);
+
 	
     // Dibujamos los ejes
     drawAxes(sceneRoot);
@@ -104,7 +139,9 @@ function drawScene() {
     requestAnimationFrame(drawScene);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	objeto.reset();
-	objeto.scale([3,3,3]);
+	objeto.scale([0.3,0.3,1]);
+		objeto.scale([2,2,2]);
+
     objeto.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
 
 /*	vueltamundo.reset();
