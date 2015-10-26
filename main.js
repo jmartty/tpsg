@@ -3,6 +3,7 @@
 var gl = null;
 var canvas = null;
 var programManager = null;
+var camera = null;
 var tick = 0;
 
 // Funcion para inicializar el contexto webGL
@@ -33,6 +34,8 @@ function main() {
     setupWebGL();
     // Load shaders and programs
     programManager = new ProgramManager();
+    // Load camera
+    camera = new Camera();
     // Add shaders from <script>
     programManager.addShader("default-vs");
     programManager.addShader("lighting-vs");
@@ -56,6 +59,7 @@ function main() {
     // Draw
     //drawScene();
     requestAnimationFrame(drawScene);
+    //requestAnimationFrame(drawScene);
 
 }
 
@@ -63,8 +67,6 @@ function drawAxes(parent) {
     axes = new SceneNode();
     axes.create("axes", null);
     parent.attachChild(axes);
-    // Un escalado para mostrar que se funciona
-    axes.scale([2.0, 2.0, 0.5]);
 
     axis_x = new Curve();
     axis_x.create("x", "default");
@@ -87,11 +89,6 @@ function drawAxes(parent) {
     axis_z.setupGLBuffers();
     axes.attachChild(axis_z);
 
-
-    // Draw
-    drawScene();
-    //requestAnimationFrame(drawScene);
-
 }
 
 // Funcion general de dibujado
@@ -101,10 +98,11 @@ function drawScene() {
 
 	vueltamundo.reset();
 	vueltamundo.scale([0.5, 0.5, 0.5]); 
-	vueltamundo.translate([0.5, 0.5, -0.5]);
-
-    vueltamundo.rotate(document.getElementById('degrees').value, [document.getElementById('x').value, document.getElementById('y').value, document.getElementById('z').value]);
 	tick += 0.5;
 	ferriswheel.animate(tick);
+    // Update camera
+    camera.setCamPos(document.getElementById('camposx').value, document.getElementById('camposy').value, document.getElementById('camposz').value);
+    camera.setCamDir(document.getElementById('camazi').value, document.getElementById('campolar').value);
+    programManager.updateViewMatrix(camera.getViewMatrix());
     sceneRoot.draw();
 }

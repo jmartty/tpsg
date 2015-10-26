@@ -99,10 +99,12 @@ function ProgramManager() {
     // Debera tomar parametros eventualmente si se puede cambiar la camara
     this.setViewMatrix = function() {
         var u_view_matrix = gl.getUniformLocation(this.active, "uViewMatrix");
-        this.vMatrix = mat4.create();
-        mat4.lookAt(this.vMatrix, [3, 3, 3], [0, 0, 0], [0, 0, 1]);
         gl.uniformMatrix4fv(u_view_matrix, false, this.vMatrix);
         return this.vMatrix;
+    }
+    
+    this.updateViewMatrix = function(viewMatrix) {
+        this.vMatrix = viewMatrix;
     }
 
     // Lo carga cada modelo
@@ -570,7 +572,7 @@ Circle.prototype.setupModelData = function(steps, color) {
         this.color_buffer.push(color[0]);
         this.color_buffer.push(color[1]);
         this.color_buffer.push(color[2]);
-    };
+    }
 }
 
 Circle.prototype.setupIndexBuffer = function() {
@@ -618,6 +620,37 @@ SurfaceOfRevolution.prototype.setupModelData = function(cols, rows, color, param
             this.color_buffer.push(color[1]);
             this.color_buffer.push(color[2]);
 
-       };
-    };
+       }
+    }
+}
+
+// Clase camara
+function Camera() {
+    
+    // Defaults
+    this.cameraPos = vec3.fromValues(2, 2, 2);
+    this.cameraDirAzi = 45 * Math.PI/180.0;
+    this.cameraDirPolar = -125 * Math.PI/180.0;
+    
+    // Parametrizacion de la camara
+    this.setCamPos = function(x, y, z) {
+        this.cameraPos = vec3.fromValues(x, y, z);
+    }
+    
+    // Converts deg to rad
+    this.setCamDir = function(azi, polar) {
+        this.cameraDirAzi = azi * Math.PI/180.0;
+        this.cameraDirPolar = polar * Math.PI/180.0;
+    }
+
+    this.getViewMatrix = function() {
+        var lookat = vec3.create();
+        vMatrix = mat4.create();
+        vec3.add(lookat, this.cameraPos, vec3.fromValues(
+            Math.sin(this.cameraDirPolar) * Math.cos(this.cameraDirAzi),
+            Math.sin(this.cameraDirPolar) * Math.sin(this.cameraDirAzi),
+            Math.cos(this.cameraDirPolar)
+        ));
+        return mat4.lookAt(vMatrix, this.cameraPos, lookat, [0, 0, 1]);
+    }
 }
