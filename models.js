@@ -338,3 +338,53 @@ function createPilar(name, parent, color) {
 	
 }
 
+// Array clone
+function arrayClone(arr) {
+    var i, copy;
+    if(Array.isArray(arr)) {
+        copy = arr.slice(0);
+        for(i = 0;i < copy.length;i++) {
+            copy[i] = arrayClone(copy[i]);
+        }
+        return copy;
+    }else if(typeof arr === 'object') {
+        throw 'Cannot clone array containing an object!';
+    }else{
+        return arr;
+    }
+}
+
+function createRollerCoaster(parent, spline) {
+    
+    cutVerts = [[.1, .1], [-.1, .1], [-.1, -.1], [.1, -.1]];
+    cutNormals = [[.7, .7], [-.7, .7], [-.7, -.7], [.7, -.7]];
+    cutVertsLeft = arrayClone(cutVerts);
+    cutVertsLeft.forEach(function(v) { v[0] -= .5; });
+    cutVertsRight = arrayClone(cutVerts);
+    cutVertsRight.forEach(function(v) { v[0] += .5; });
+    
+    leftRail = new ExtrusionSurface();
+    leftRail.create("leftRail", "lighting");
+    leftRail.setupModelData(
+        cutVertsLeft,
+        cutNormals,
+        [0, .7, 0],
+        spline,
+        50);
+    leftRail.setupIndexBuffer();
+    leftRail.setupGLBuffers();
+
+    rightRail = new ExtrusionSurface();
+    rightRail.create("rightRail", "lighting");
+    rightRail.setupModelData(
+        cutVertsRight,
+        cutNormals,
+        [0, .7, 0],
+        spline,
+        50);
+    rightRail.setupIndexBuffer();
+    rightRail.setupGLBuffers();
+    
+    parent.attachChild(leftRail);
+    parent.attachChild(rightRail);
+}

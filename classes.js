@@ -5,7 +5,7 @@ function ProgramManager() {
     this.programs = [];
     this.shaders = [];
     this.active = null;
-    
+
     this.vMatrix = null;
     this.pMatrix = null;
     
@@ -90,7 +90,7 @@ function ProgramManager() {
     this.setProjectionMatrix = function() {
         var u_proj_matrix = gl.getUniformLocation(this.active, "uProjectionMatrix");
         this.pMatrix = mat4.create();
-        mat4.perspective(this.pMatrix, Math.PI/4, canvas.width/canvas.height, 0.1, 100.0);
+        mat4.perspective(this.pMatrix, Math.PI/4, canvas.width/canvas.height, 0.1, 1000.0);
         //mat4.ortho(pMatrix, -1.0, 1.0, -1.0, 1.0, -10, 100.0);
         gl.uniformMatrix4fv(u_proj_matrix, false, this.pMatrix);
         return this.pMatrix;
@@ -231,7 +231,7 @@ function SceneNode() {
             gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_position_buffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.position_buffer), gl.STATIC_DRAW);
         }
-        if(this.normal_buffer) {
+        if(this.programid != "default" && this.normal_buffer) {
             this.webgl_normal_buffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_normal_buffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.normal_buffer), gl.STATIC_DRAW);
@@ -440,14 +440,13 @@ Cylinder.prototype.setupModelData = function(cols, rows, color) {
     };
 }
 
-// Cilindro
+// Superficie de extrusion
 ExtrusionSurface = function() { }
 ExtrusionSurface.prototype = new Grid();
 // cutVerts = array of vertices (2d) in the XY plane definining the cut
-// curve = f(u), R->R^3
-// curveD = f'(u), derivative of f(u)
+// spline = instancia de tipo Bspline()
 // steps = number of divisions of paramter u
-ExtrusionSurface.prototype.setupModelData = function(cutVerts, cutNormals, color, curve, curveD, steps) {
+ExtrusionSurface.prototype.setupModelData = function(cutVerts, cutNormals, color, curve, steps) {
     // Connect last with first
     cutVerts.push(cutVerts[0]);
     cutNormals.push(cutNormals[0]);
@@ -463,8 +462,8 @@ ExtrusionSurface.prototype.setupModelData = function(cutVerts, cutNormals, color
     
     for (j = 0.0;j < steps;j++) {
         
-        var pos = curve(j/(steps-1));
-        var tg = curveD(j/(steps-1));
+        var pos = curve.pos(j/(steps-1));
+        var tg = curve.tan(j/(steps-1));
         
         vec3.normalize(tg, tg);
         var up = [0, 0, 1];
@@ -528,6 +527,23 @@ Curve.prototype.setupIndexBuffer = function() {
 
     for(i = 0; i < this.steps; i++) {
         this.index_buffer.push(i);
+    }
+}
+
+// Curva basada en un Bspline
+SplineCurve = function() { }
+SplineCurve.prototype = new Curve();
+SplineCurve.prototype.setupModelData = function(curve, steps) {
+    this.draw_mode = gl.LINE_STRIP;
+    this.steps = steps;
+    
+    this.position_buffer = [];
+    this.color_buffer = [];
+    
+    for (j = 0.0;j < steps;j++) {
+        var pos = curve.pos(j/(steps-1));
+        this.position_buffer = this.position_buffer.concat(pos);
+        this.color_buffer = this.color_buffer.concat([0.0, 1.0, 0.0]);
     }
 }
 
