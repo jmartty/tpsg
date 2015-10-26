@@ -47,12 +47,11 @@ function main() {
     // Setup de la escena
     sceneRoot = new SceneRoot();
 	
-/*	ferriswheel = new FerrisWheel();
+	ferriswheel = new FerrisWheel();
 	vueltamundo = new SceneNode();
 	vueltamundo.create("vuelta",null);
 	ferriswheel.createModel(vueltamundo);
 	sceneRoot.attachChild(vueltamundo);
-*/
 
 	objeto = new SceneNode();
 	objeto.create("sup", null);
@@ -64,6 +63,38 @@ function main() {
     // Dibujamos los ejes
     drawAxes(sceneRoot);
 
+    // Un piso para guiarnos
+    base = new Grid();
+    base.create("", "default");
+    base.setupModelData(25, 25, [.7, .7, .7]);
+    base.setupIndexBuffer();
+    base.setupGLBuffers();
+    base.translate([1, 1, 0]);
+    base.scale([25, 25, 1]);
+    base.translate([-0.5, -0.5, -0.025]);
+    base.draw_mode = gl.LINE_STRIP;
+    sceneRoot.attachChild(base);
+    
+    // Rollercoaster 
+    var rollerCoasterSpline = new Bspline(4);
+    rollerCoasterSpline.controlPoints = [
+      [5, 0, 0],
+      [6, 5, 0],
+      [5, 7, 2],
+      [-5, 7, 1],
+      [-3,0, 0],
+      [-4,-4,-1],
+      [4,-5,0],
+    ];
+
+    // Curva cerrada
+    rollerCoasterSpline.controlPoints = rollerCoasterSpline.controlPoints.concat(
+        rollerCoasterSpline.controlPoints.slice(0, rollerCoasterSpline.order - 1)
+    );
+    
+    createRollerCoaster(sceneRoot, rollerCoasterSpline);
+    
+    
     // Draw
     //drawScene();
     requestAnimationFrame(drawScene);
@@ -104,17 +135,22 @@ function drawScene() {
     requestAnimationFrame(drawScene);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	objeto.reset();
-//	objeto.scale([0.3,0.3,1]);
+    objeto.translate([0, 2, 0]);
+	objeto.scale([0.3,0.3,1]);
     objeto.scale([2,2,2]);
 
-/*	vueltamundo.reset();
-	vueltamundo.scale([0.5, 0.5, 0.5]); 
+
+	vueltamundo.reset();
+    vueltamundo.translate([1, -6, 0]);
+	//vueltamundo.scale([0.5, 0.5, 0.5]); 
 	tick += 0.5;
-	*/
+
     // Update camera
     camera.setCamPos(document.getElementById('camposx').value, document.getElementById('camposy').value, document.getElementById('camposz').value);
     camera.setCamDir(document.getElementById('camazi').value, document.getElementById('campolar').value);
     programManager.updateViewMatrix(camera.getViewMatrix());
-	//ferriswheel.animate(tick); 
+
+	ferriswheel.animate(tick); 
+
     sceneRoot.draw();
 }
