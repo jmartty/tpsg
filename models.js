@@ -348,23 +348,6 @@ function createPilar(name, parent, color) {
 	return parent;
 }
 
-//silla
-function createCarChair(name, parent, color) {
-	//asiento
-	var grid = createPlane("asiento", color);
-	parent.attachChild(grid);
-	grid.translate([-0.5, 0.0, 0.0]);
-	
-	//respaldo
-	grid = createPlane("respaldo", color);
-	parent.attachChild(grid);
-	grid.rotate(109.47, [1.0, 0.0, 0.0]);
-	grid.translate([-0.5, 0.0, 0.0]);
-	grid.scale([1, 1, -1]);
-	
-	return parent;
-}
-
 
 // Array clone
 function arrayClone(arr) {
@@ -534,10 +517,25 @@ function createDisk(name, parent, color) {
 	
 	var sup = createRevoSurface("hola", color, contorno, derivada);
 	parent.attachChild(sup);
-	//sup.translate([0,0,1]);
 	sup.scale([2,2,0.3]);
-}
+	sup.scale([3,3,3]);
 	
+	//creo las sillas alrededor
+	var i = 0;
+	var chairstring;
+	var chaircolors = [ blue, green, orange, pink, yellow, red,  darkgreen ]
+	for (i; i<14;i++) {
+		chairstring = new SceneNode();
+		chairstring.create("wheel", null);
+		createStringChair(name+"chair"+i, chairstring, chaircolors[i%7]);
+		parent.attachChild(chairstring);
+		chairstring.rotate(i*360/14, [0.0, 0.0, 1.0]);
+		chairstring.translate([1.5, 0.0, 0.5]);
+		chairstring.rotate(-20, [0.0, 1.0, 0.0]);
+		chairstring.scale([0.2, 0.2, 0.2]);
+	}
+	
+}
 	
 function createFlyingChairs(name, parent, color) {
 	//columna
@@ -553,9 +551,40 @@ function createFlyingChairs(name, parent, color) {
 	parent.attachChild(disco);
 	disco.translate([0,0,0.9]);
 	disco.rotate(15,[0,1,0])
-	disco.scale([1.5,1.5,1.5]);
+	disco.scale([0.5,0.5,0.5]);
 }
 
 function createStringChair(name, parent, color) {
+	//silla
+	var chair = new SceneNode();
+	chair.create("sup", null);
+	createCarChair("hola", chair, color);
+	parent.attachChild(chair);
+	chair.translate([0,1/3,-7]);
+	
+	//cuerda
+	var cyl = createCylinder("cuerda", grey);
+	parent.attachChild(cyl);
+	cyl.translate([0,0,-6]);
+	cyl.scale([0.05,0.05,6]);
 	
 }
+
+
+//silla
+function createCarChair(name, parent, color) {
+	//asiento
+	var grid = createPlane("asiento", color);
+	parent.attachChild(grid);
+	grid.translate([-0.5, 0.0, 0.0]);
+	
+	//respaldo
+	grid = createPlane("respaldo", color);
+	parent.attachChild(grid);
+	grid.rotate(109.47, [1.0, 0.0, 0.0]);
+	grid.translate([-0.5, 0.0, 0.0]);
+	grid.scale([1, 1, -1]);
+	
+	return parent;
+}
+
