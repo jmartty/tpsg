@@ -460,9 +460,47 @@ function createMainColumn(name, parent, color) {
 	var sup = createRevoSurface("hola", color, contorno, derivada);
 	parent.attachChild(sup);
 	sup.scale([0.3,0.3,1]);
-
+}
 	
+//disco de flying chairs
+function createDisk(name, parent, color) {
+	var contorno = function(s) {
+		if (s<=0.5) {
+			return s;
+		} else if (s>0.5 && s<= 1) {
+			return 0.5; 
+		}
+	}
+	
+	var derivada = function(s) {
+		if (s<=0.5) {
+			return 1;
+		} else if (s>0.5 && s<= 1) {
+			return 0; 
+		}
+	}
+	
+	var sup = createRevoSurface("hola", color, contorno, derivada);
+	parent.attachChild(sup);
+	//sup.translate([0,0,1]);
+	sup.scale([2,2,0.3]);
 }
 	
 	
+function createFlyingChairs(name, parent, color) {
+	//columna
+	columna = new SceneNode();
+	columna.create("sup", null);
+	createMainColumn("hola", columna, color);
+	parent.attachChild(columna);
+	
+	//disco
+	disco = new SceneNode();
+	disco.create("sup", null);
+	createDisk("hola", disco, color);
+	parent.attachChild(disco);
+	disco.translate([0,0,0.95]);
+	//disco.rotate(10,[0,1,0])
+	disco.scale([1.5,1.5,1.5]);
 
+}
