@@ -55,7 +55,7 @@ function main() {
 
 	objeto = new SceneNode();
 	objeto.create("sup", null);
-	createFlyingChairs("hola", objeto, [1, 1 , 0]);
+	createFlyingChairs("hola", objeto, [1, 1 , 1]);
 
 	sceneRoot.attachChild(objeto);
 
@@ -135,9 +135,9 @@ function drawScene() {
     requestAnimationFrame(drawScene);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	objeto.reset();
-    objeto.translate([0, 2, 0]);
-	objeto.scale([0.3,0.3,1]);
-    objeto.scale([2,2,2]);
+ //   objeto.translate([0, 2, 0]);
+//	objeto.scale([0.3,0.3,1]);
+    objeto.scale([2.5,2.5,2.5]);
 
 
 	vueltamundo.reset();

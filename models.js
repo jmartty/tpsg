@@ -551,8 +551,11 @@ function createFlyingChairs(name, parent, color) {
 	disco.create("sup", null);
 	createDisk("hola", disco, color);
 	parent.attachChild(disco);
-	disco.translate([0,0,0.95]);
-	//disco.rotate(10,[0,1,0])
+	disco.translate([0,0,0.9]);
+	disco.rotate(15,[0,1,0])
 	disco.scale([1.5,1.5,1.5]);
+}
 
+function createStringChair(name, parent, color) {
+	
 }
