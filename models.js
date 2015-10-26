@@ -52,6 +52,41 @@ function createRevoSurface(name, color, func, deriv) {
 	return surface;
 }
 
+//sillas voladoras
+function FlyingChairs() {
+	this.disco = null;
+	this.color = red;
+
+	this.createModel = function(parent) {
+		//columna
+		columna = new SceneNode();
+		columna.create("sup", null);
+		createMainColumn("hola", columna, this.color);
+		parent.attachChild(columna);
+		columna.scale([1.2,1.2,1]);
+		
+		//disco
+		this.disco = new SceneNode();
+		this.disco.create("sup", null);
+		createDisk("hola", this.disco, this.color);
+		parent.attachChild(this.disco);
+		this.disco.translate([0,0,0.9]);
+		this.disco.rotate(15,[0,1,0])
+		this.disco.scale([0.5,0.5,0.5]);
+	}
+	
+	this.animate = function (tick) {
+		this.disco.reset();
+		this.disco.translate([0,0,0.9]);
+		this.disco.rotate(15,[0,1,0])
+		this.disco.rotate(tick, [0,0,1]);
+		this.disco.scale([0.5,0.5,0.5]);
+		
+		
+	}
+
+}
+
 //la vuelta l mundo
 function FerrisWheel() {
 	this.wheelSet = null;

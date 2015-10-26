@@ -53,11 +53,12 @@ function main() {
 	ferriswheel.createModel(vueltamundo);
 	sceneRoot.attachChild(vueltamundo);
 
-	objeto = new SceneNode();
-	objeto.create("sup", null);
-	createFlyingChairs("hola", objeto, [1,  0, 0]);
 
-	sceneRoot.attachChild(objeto);
+	flyingchairs = new FlyingChairs();
+	sillas = new SceneNode();
+	sillas.create("sillas", null);
+	flyingchairs.createModel(sillas);
+	sceneRoot.attachChild(sillas);
 
 	
     // Dibujamos los ejes
@@ -134,18 +135,21 @@ function drawAxes(parent) {
 function drawScene() {
     requestAnimationFrame(drawScene);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-	objeto.reset();
- //   objeto.translate([0, 2, 0]);
-//	objeto.scale([0.3,0.3,1]);
-    objeto.scale([2.5,2.5,2.5]);
+	
+	//posicionar juego sillas
+	sillas.reset();
+    sillas.translate([-4, -3, 0]);
+    sillas.scale([2.5,2.5,2.5]);
 
-
+	//posicionar vuelta al mundo
 	vueltamundo.reset();
     vueltamundo.translate([1, -6, 0]);
-	//vueltamundo.scale([0.5, 0.5, 0.5]); 
+	
+	//animacion
 	tick += 0.5;
 	ferriswheel.animate(tick); 
-    
+	flyingchairs.animate(tick);
+	
     // Update camera from form controls
     //camera.updateFromDocument();
     
