@@ -108,13 +108,21 @@ function RollerCoaster() {
 		var tg = this.spline.tan(s);
 		
 		var rotaxe = vec3.create();
+		vec3.normalize(tg, tg);
+
 		vec3.cross(rotaxe, forward, tg);
         vec3.normalize(rotaxe, rotaxe);
-
-        var rot = 180 / Math.PI * Math.acos(vec3.dot(forward, tg)/( vec3.length(forward)*vec3.length(tg) ));
-		
+				
 		this.car.translate(pos);
-		this.car.rotate(rot, rotaxe);
+		
+		if (tg[1] > 0) {
+		    var rot = 180 / Math.PI * Math.acos(vec3.dot(tg, forward)/( vec3.length(forward)*vec3.length(tg) ));
+			this.car.rotate(rot, rotaxe);
+	   } else {
+			var rot = 180 / Math.PI * Math.acos(vec3.dot(tg, [0,-1,0])/( vec3.length([0,-1,0])*vec3.length(tg) ));
+			this.car.rotate(-rot, rotaxe);
+			this.car.rotate(180, [0,0,1]);
+		}
 		this.car.scale([3,3,3]);
 		
 	}

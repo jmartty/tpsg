@@ -196,7 +196,7 @@ function drawScene() {
     vueltamundo.translate([1, -6, 0]);
 	
 	//animacion
-	tick += 0.5;
+	tick += 0.2;
 	ferriswheel.animate(tick); 
 	flyingchairs.animate(tick);
 	
