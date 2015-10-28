@@ -104,27 +104,28 @@ function RollerCoaster() {
 		this.car.reset();
 		
 		var pos = this.spline.pos(s);
-		var forward = vec3.fromValues(0,1,0);
-		var tg = this.spline.tan(s);
-		
-		var rotaxe = vec3.create();
-		vec3.normalize(tg, tg);
-
-		vec3.cross(rotaxe, forward, tg);
-        vec3.normalize(rotaxe, rotaxe);
-				
 		this.car.translate(pos);
-		
-		if (tg[1] > 0) {
-		    var rot = 180 / Math.PI * Math.acos(vec3.dot(tg, forward)/( vec3.length(forward)*vec3.length(tg) ));
-			this.car.rotate(rot, rotaxe);
-	   } else {
-			var rot = 180 / Math.PI * Math.acos(vec3.dot(tg, [0,-1,0])/( vec3.length([0,-1,0])*vec3.length(tg) ));
-			this.car.rotate(-rot, rotaxe);
-			this.car.rotate(180, [0,0,1]);
-		}
-		this.car.scale([3,3,3]);
-		
+ 
+        // Calculate orientation
+        var forward = vec3.fromValues(0,1,0);
+		var tg = this.spline.tan(s);
+ 
+        vec3.normalize(tg, tg);
+        var up = [0, 0, 1];
+        var left = [];
+        vec3.cross(left, up, tg);
+        vec3.normalize(left, left);
+        vec3.cross(up, tg, left);
+ 
+        mat4.multiply(this.car.mMatrix, this.car.mMatrix, [].concat(
+          left, [0],
+          up, [0],
+          tg, [0],
+          [0, 0, 0, 1]
+        ));
+ 
+		this.car.rotate(90, [1, 0, 0]);
+		this.car.scale([3,1,-3]);
 	}
 }
 
