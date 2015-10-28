@@ -52,6 +52,73 @@ function createRevoSurface(name, color, func, deriv) {
 	return surface;
 }
 
+function RollerCoaster() {
+	this.rollercoaster = null;
+	this.car = null;
+	this.carcolor = blue;
+	this.railscolor = red;
+	this.spline = new Bspline(4);
+    this.spline.controlPoints = [
+		[5, 0, 1],
+		[6, 5, 1],
+		[5, 7, 5],
+		[-5, 7, 3],
+		[-3,0, 1],
+		[-2,-2,2],
+		[4,-5,1],
+    ];
+	
+    // Curva cerrada
+    this.spline.controlPoints = this.spline.controlPoints.concat(
+        this.spline.controlPoints.slice(0, this.spline.order - 1)
+    );
+
+	this.createModel = function(parent) {
+		//estructura
+		structure = new SceneNode();
+		structure.create("estruc", null);
+		createRollerCoaster(structure, this.spline, this.railscolor);
+		parent.attachChild(structure);
+		
+		//carrito
+		this.car = new SceneNode();
+		this.car.create("car", null);
+		createCar("car", this.car, this.carcolor);
+		parent.attachChild(this.car);	
+	
+	/*	var pos = this.spline.pos(0);
+		var tang = this.spline.tan(0);
+		var forward = [0,1,0];
+
+		var rot = 180 * Math.acos(1/vec3.length(tang)) / Math.PI;
+		var rotaxe = [];
+		vec3.cross(rotaxe, forward, tang);
+		this.car.translate(pos);
+		this.car.rotate(rot, rotaxe);
+		this.car.scale([3,3,3]);*/
+	}
+	
+	
+	this.animate = function(tick) {
+		var s = tick/100 % 1;
+		this.car.reset();
+		
+		var pos = this.spline.pos(s);
+		var forward = [0,1,0];
+		var tang = this.spline.tan(s);
+		
+		var rot = 180 * Math.acos(1/vec3.length(tang)) / Math.PI;
+		var rotaxe = [];
+		vec3.cross(rotaxe, forward, tang);
+		
+		this.car.translate(pos);
+		this.car.rotate(rot, rotaxe);
+		this.car.scale([3,3,3]);
+		
+	}
+}
+
+
 //sillas voladoras
 function FlyingChairs() {
 	this.disco = null;
@@ -153,7 +220,6 @@ function FerrisWheel() {
 		}
 	}
 }
-
 
 //rueda de la vuelta al mundo
 function createWheel(name, parent, color) {
@@ -400,21 +466,22 @@ function arrayClone(arr) {
     }
 }
 
-function createRollerCoaster(parent, spline) {
+function createRollerCoaster(parent, spline, color) {
     
-    cutVerts = [[.1, .1], [-.1, .1], [-.1, -.1], [.1, -.1]];
+    cutVerts = [[.08, .08], [-.08, .08], [-.08, -.08], [.08, -.08]];
     cutNormals = [[.7, .7], [-.7, .7], [-.7, -.7], [.7, -.7]];
     cutVertsLeft = arrayClone(cutVerts);
-    cutVertsLeft.forEach(function(v) { v[0] -= .5; });
+    cutVertsLeft.forEach(function(v) { v[0] -= .4; });
     cutVertsRight = arrayClone(cutVerts);
-    cutVertsRight.forEach(function(v) { v[0] += .5; });
+    cutVertsRight.forEach(function(v) { v[0] += .4; });
     
+	//rieles
     leftRail = new ExtrusionSurface();
     leftRail.create("leftRail", "lighting");
     leftRail.setupModelData(
         cutVertsLeft,
         cutNormals,
-        [0, .7, 0],
+        color,
         spline,
         50);
     leftRail.setupIndexBuffer();
@@ -425,14 +492,81 @@ function createRollerCoaster(parent, spline) {
     rightRail.setupModelData(
         cutVertsRight,
         cutNormals,
-        [0, .7, 0],
+        color,
         spline,
         50);
     rightRail.setupIndexBuffer();
     rightRail.setupGLBuffers();
-    
+	
+	
+	cutVerts = [[0.07, 0.07], [-0.07, 0.07], [-0.07, -0.07], [0.07, -0.07]];
+	centralRail = new ExtrusionSurface();
+    centralRail.create("centralrail", "lighting");
+    centralRail.setupModelData(
+        cutVerts,
+        cutNormals,
+        color,
+        spline,
+        50);
+    centralRail.setupIndexBuffer();
+    centralRail.setupGLBuffers();    
+	
+	parent.attachChild(centralRail);
     parent.attachChild(leftRail);
     parent.attachChild(rightRail);
+	
+	//durmientes	
+	var u = 0;
+	var pos = spline.pos(u);
+	var tang;
+	var rot;
+	var curveLength = 0;
+	for (u; u<1; u=u+0.001) {
+		newpos = spline.pos(u);
+		curveLength +=  vec3.distance(newpos, pos);
+		pos = newpos;
+	}
+	
+	var sleepersNum = 70;
+	var colsNum = 10;
+	var sleepersGap = curveLength / sleepersNum;
+	var colsGap = curveLength / colsNum; 
+
+	var sleepD = 0;
+	var colsD = 0;
+	var u = 0;
+	pos = spline.pos(u);
+	var newpos;
+	for (u; u<1; u=u+0.001) {
+			newpos = spline.pos(u);
+			sleepD +=  vec3.distance(newpos, pos);
+			colsD +=  vec3.distance(newpos, pos);
+			if (sleepD>=sleepersGap) {
+				tang = spline.tan(u);
+				rot = 180 * Math.atan2(tang[1],tang[0]) / Math.PI;
+
+				cylinder = createCylinder("sleeper", color);
+				cylinder.translate(pos);
+				cylinder.rotate(rot+90, [0.0, 0.0, 1.0]);
+				cylinder.rotate(90, [0.0, 1.0, 0.0]);
+				cylinder.translate([0, 0, -0.425]);
+				cylinder.scale([0.15, 0.15, .85]);
+							
+				parent.attachChild(cylinder);
+				sleepD = 0;
+			}
+			if (colsD>= colsGap) {
+				var height = pos[2];
+				cylinder = createCylinder("sleeper", color);
+				cylinder.translate([pos[0], pos[1], 0]);
+				cylinder.scale([0.15, 0.15, height]);
+				parent.attachChild(cylinder);
+				colsD = 0;
+			}
+			pos = newpos;
+	} 
+	
+
 }
 
 function createCar(name, parent, color) {
@@ -483,14 +617,14 @@ function createCar(name, parent, color) {
 	//sillas
 	var silla = new SceneNode();
 	silla.create("sillacar", null);
-	createCarChair("silla atras", silla, blue);
+	createCarChair("silla atras", silla, yellow);
 	parent.attachChild(silla);
 	silla.translate([0.0, 0.05, 0.15]);
 	silla.scale([0.3, 0.15, 0.15]);
 	
 	silla = new SceneNode();
 	silla.create("otrasilla", null);
-	createCarChair("silla atras", silla, blue);
+	createCarChair("silla atras", silla, yellow);
 	parent.attachChild(silla);
 	silla.translate([0.0, 0.3, 0.15]);
 	silla.scale([0.3, 0.15, 0.15]);
