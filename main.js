@@ -238,6 +238,8 @@ document.addEventListener('keydown', function(event) {
     // Look down
     }else if (event.keyCode == 40) {
         camera.lookDown();
+    }else if (event.keyCode == 67) {
+        camera.cycle();
     }
 
 }, true);

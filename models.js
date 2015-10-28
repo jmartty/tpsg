@@ -109,7 +109,8 @@ function RollerCoaster() {
         // Calculate orientation
         var forward = vec3.fromValues(0,1,0);
 		var tg = this.spline.tan(s);
- 
+
+		
         vec3.normalize(tg, tg);
         var up = [0, 0, 1];
         var left = [];
@@ -126,6 +127,9 @@ function RollerCoaster() {
  
 		this.car.rotate(90, [1, 0, 0]);
 		this.car.scale([3,1,-3]);
+		
+		// Update camera
+		camera.updateCartParams(pos, tg);
 	}
 }
 

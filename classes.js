@@ -647,6 +647,9 @@ function Camera() {
     this.pos = vec3.fromValues(5, 8, 5);
     this.dirAzi = -115 * Math.PI/180.0;
     this.dirPolar = 115 * Math.PI/180.0;
+    this.cameraType = 0; // 0 = free cam, 1 = cart cam
+    this.cartPos = 0;
+    this.cartTg = 0;
     
     // Parametrizacion de la camara
     this.setCamPos = function(x, y, z) {
@@ -658,21 +661,41 @@ function Camera() {
         this.dirAzi = azi * Math.PI/180.0;
         this.dirPolar = polar * Math.PI/180.0;
     }
+    
+    this.updateCartParams = function(pos, tg) {
+        this.cartPos = pos;
+        this.cartTg = tg;
+    }
 
     this.updateFromDocument = function() {
         camera.setCamPos(document.getElementById('camposx').value, document.getElementById('camposy').value, document.getElementById('camposz').value);
         camera.setCamDir(document.getElementById('camazi').value, document.getElementById('campolar').value);
     }
     
+    this.cycle = function() {
+        this.cameraType += 1;
+        if(this.cameraType > 1) this.cameraType = 0;
+    }
+    
     this.getViewMatrix = function() {
-        var lookat = vec3.create();
         vMatrix = mat4.create();
-        vec3.add(lookat, this.pos, vec3.fromValues(
-            Math.sin(this.dirPolar) * Math.cos(this.dirAzi),
-            Math.sin(this.dirPolar) * Math.sin(this.dirAzi),
-            Math.cos(this.dirPolar)
-        ));
-        return mat4.lookAt(vMatrix, this.pos, lookat, [0, 0, 1]);
+        var lookat = vec3.create();
+        // Freelook
+        if(this.cameraType == 0) {
+            vec3.add(lookat, this.pos, vec3.fromValues(
+                Math.sin(this.dirPolar) * Math.cos(this.dirAzi),
+                Math.sin(this.dirPolar) * Math.sin(this.dirAzi),
+                Math.cos(this.dirPolar)
+            ));
+            return mat4.lookAt(vMatrix, this.pos, lookat, [0, 0, 1]);
+        // Cart camera
+        }else if(this.cameraType == 1) {
+            vec3.add(lookat, this.cartPos, this.cartTg);
+            mat4.lookAt(vMatrix, this.cartPos, lookat, [0, 0, 1]);
+            return mat4.translate(vMatrix, vMatrix, [0, 0, -1]);
+        }else{
+            alert("Invalid camera type id");
+        }
     }
 
     // FPSesque cam movements
