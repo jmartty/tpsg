@@ -644,8 +644,8 @@ SurfaceOfRevolution.prototype.setupModelData = function(cols, rows, color, param
 function Camera() {
     
     // Defaults
-    this.pos = vec3.fromValues(5, 8, 5);
-    this.dirAzi = -115 * Math.PI/180.0;
+    this.pos = vec3.fromValues(10, 18, 10);
+    this.dirAzi = -110 * Math.PI/180.0;
     this.dirPolar = 115 * Math.PI/180.0;
     this.cameraType = 0; // 0 = free cam, 1 = cart cam
     this.cartPos = 0;

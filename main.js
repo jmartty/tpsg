@@ -20,7 +20,9 @@ function setupWebGL() {
         alert("Error: canvas.getContext()");
     }
     // Other gl settings
-    gl.clearColor(0.1, 0.1, 0.2, 1.0);
+   // gl.clearColor(0.1, 0.1, 0.2, 1.0);
+    gl.clearColor(0.6, 1, 1, 1.0);
+
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LESS);
     gl.viewport(0, 0, canvas.width, canvas.height);
@@ -64,92 +66,27 @@ function main() {
     // Dibujamos los ejes
     drawAxes(sceneRoot);
 
-    // Un piso para guiarnos
+    // Un piso 
     base = new Grid();
     base.create("", "default");
-    base.setupModelData(25, 25, [0.2, 1, 0]);
+    base.setupModelData(25, 25, [0, 0.8, 0.2]);
     base.setupIndexBuffer();
     base.setupGLBuffers();
     base.translate([1, 1, 0]);
-    base.scale([25, 25, 1]);
+    base.scale([80, 30, 1]);
     base.translate([-0.5, -0.5, -0.025]);
-    base.draw_mode = gl.LINE_STRIP;
+  //  base.draw_mode = gl.LINE_STRIP;
     sceneRoot.attachChild(base);
     
-  /*  // Rollercoaster 
-    var spline = new Bspline(4);
-    spline.controlPoints = [
-      [5, 0, 1],
-      [6, 5, 1],
-      [5, 7, 5],
-      [-5, 7, 3],
-      [-3,0, 1],
-      [-2,-2,2],
-      [4,-5,1],
-    ];
-	
-    // Curva cerrada
-    spline.controlPoints = spline.controlPoints.concat(
-        spline.controlPoints.slice(0, spline.order - 1)
-    );
-    */
-  //  createRollerCoaster(sceneRoot, spline);
     
 	rollercoaster = new RollerCoaster();
 	montarusa = new SceneNode();
 	montarusa.create("montarusa",null);
 	rollercoaster.createModel(montarusa);
-	sceneRoot.attachChild(montarusa);
-
-	
-/*	var u = 0;
-	var pos ;
-	var tang;
-	var rot;
-		
-	
-	pos = spline.pos(u);
-	var curveLength = 0;
-	for (u; u<1; u=u+0.001) {
-		newpos = spline.pos(u);
-		curveLength +=  vec3.distance(newpos, pos);
-		pos = newpos;
-	}
-	
-	var sleepersNum = 70;
-	var sleepersGap= curveLength / sleepersNum;
-	
-	var d = 0;
-	var u = 0;
-	pos = spline.pos(u);
-	var newpos;
-	for (u; u<1; u=u+0.001) {
-			newpos = spline.pos(u);
-			d +=  vec3.distance(newpos, pos);
-			if (d>=sleepersGap) {
-				tang = spline.tan(u);
-				rot = 180 * Math.atan2(tang[1],tang[0]) / Math.PI;
-
-				cylinder = createCylinder("test", [(0,0,1)]);
-				cylinder.translate(pos);
-				cylinder.rotate(rot+90, [0.0, 0.0, 1.0]);
-				cylinder.rotate(90, [0.0, 1.0, 0.0]);
-				cylinder.translate([0, 0, -0.5]);
-				cylinder.scale([0.2, 0.2, 1]);
-				
-				Math.cos(2.0*Math.PI*i/(this.cols-1))
-			
-				sceneRoot.attachChild(cylinder);
-				d = 0;
-			}
-			pos = newpos;
-	} */
-	
+	sceneRoot.attachChild(montarusa);	
     
     // Draw
-    //drawScene();
     requestAnimationFrame(drawScene);
-    //requestAnimationFrame(drawScene);
 
 }
 
@@ -189,19 +126,23 @@ function drawScene() {
 	//posicionar juego sillas
 	sillas.reset();
     sillas.translate([-4, -3, 0]);
-    sillas.scale([2.5,2.5,2.5]);
+    sillas.scale([5,5,5]);
 
 	//posicionar vuelta al mundo
 	vueltamundo.reset();
-    vueltamundo.translate([1, -6, 0]);
+	vueltamundo.translate([9, -4, 0]);
+	vueltamundo.rotate(45, [0,0,1]);
+	vueltamundo.scale([1.5,1.5,1.5]);
+	
+	//posicionar montaña rusa
+	montarusa.reset();
+	montarusa.translate([2, 2, 0]);
 	
 	//animacion
-	tick += 0.2;
+	tick += 0.5;
 	ferriswheel.animate(tick); 
 	flyingchairs.animate(tick);
-	
-	montarusa.reset();
-	rollercoaster.animate(tick);
+	rollercoaster.animate(tick/2.5);
 	
     // Update camera from form controls
     //camera.updateFromDocument();

@@ -2,10 +2,11 @@ var blue = [ 0, 0, 1 ];
 var red = [ 1, 0, 0 ];
 var darkgreen = [ 0.5, 0.5, 0 ];
 var green = [ 0, 1, 0.5 ];
-var grey = [ 0.15, 0.15, 0.15 ];
+var grey = [ 0.5, 0.5, 0.5 ];
 var yellow = [ 1, 1, 0 ];
 var orange = [ 1, 0.6, 0 ];
 var pink = [ 1, 0.3, 0.7 ];
+var purple = [ 0.7, 0.4 , 1];
 
 function createCylinder(name, color) {
 	var cylinder = new Cylinder();
@@ -85,17 +86,6 @@ function RollerCoaster() {
 		this.car.create("car", null);
 		createCar("car", this.car, this.carcolor);
 		parent.attachChild(this.car);	
-	
-	/*	var pos = this.spline.pos(0);
-		var tang = this.spline.tan(0);
-		var forward = [0,1,0];
-
-		var rot = 180 * Math.acos(1/vec3.length(tang)) / Math.PI;
-		var rotaxe = [];
-		vec3.cross(rotaxe, forward, tang);
-		this.car.translate(pos);
-		this.car.rotate(rot, rotaxe);
-		this.car.scale([3,3,3]);*/
 	}
 	
 	
@@ -126,7 +116,7 @@ function RollerCoaster() {
         ));
  
 		this.car.rotate(90, [1, 0, 0]);
-		this.car.scale([3,1,-3]);
+		this.car.scale([3,2,-3]);
 		
 		// Update camera
 		camera.updateCartParams(pos, tg);
@@ -137,7 +127,7 @@ function RollerCoaster() {
 //sillas voladoras
 function FlyingChairs() {
 	this.disco = null;
-	this.color = red;
+	this.color = purple;
 
 	this.createModel = function(parent) {
 		//columna
@@ -543,7 +533,7 @@ function createRollerCoaster(parent, spline, color) {
 	}
 	
 	var sleepersNum = 70;
-	var colsNum = 10;
+	var colsNum = 15;
 	var sleepersGap = curveLength / sleepersNum;
 	var colsGap = curveLength / colsNum; 
 
@@ -732,7 +722,7 @@ function createFlyingChairs(name, parent, color) {
 	columna.create("sup", null);
 	createMainColumn("hola", columna, color);
 	parent.attachChild(columna);
-	columna.scale([1.2,1.2,1]);
+	columna.scale([1.5,1.5,1]);
 	
 	//disco
 	disco = new SceneNode();
