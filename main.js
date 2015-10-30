@@ -125,7 +125,7 @@ function drawScene() {
 	
 	//posicionar juego sillas
 	sillas.reset();
-    sillas.translate([-4, -3, 0]);
+    sillas.translate([-8, -3, 0]);
     sillas.scale([5,5,5]);
 
 	//posicionar vuelta al mundo
@@ -136,7 +136,7 @@ function drawScene() {
 	
 	//posicionar montaña rusa
 	montarusa.reset();
-	montarusa.translate([2, 2, 0]);
+//	montarusa.translate([2, 2, 0]);
 	
 	//animacion
 	tick += 0.5;

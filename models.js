@@ -7,6 +7,7 @@ var yellow = [ 1, 1, 0 ];
 var orange = [ 1, 0.6, 0 ];
 var pink = [ 1, 0.3, 0.7 ];
 var purple = [ 0.7, 0.4 , 1];
+var lightblue = [ 0.5, 0.8, 1]; 
 
 function createCylinder(name, color) {
 	var cylinder = new Cylinder();
@@ -54,7 +55,8 @@ function createRevoSurface(name, color, func, deriv) {
 }
 
 function RollerCoaster() {
-	this.rollercoaster = null;
+	this.structure = null;
+	this.water = null;
 	this.car = null;
 	this.carcolor = blue;
 	this.railscolor = red;
@@ -69,23 +71,46 @@ function RollerCoaster() {
 		[4,-5,1],
     ];
 	
+	this.waterspline = new Bspline(4);
+	this.waterspline.controlPoints = [
+		[4, 0, 0],
+		[2, 4, 0],
+		[-2, 4, 0],
+		[-5, 1, 0],
+		[-1,-1, 0],
+		[-1,-4,0],
+		[2,-3,0],
+	];
+	
     // Curva cerrada
     this.spline.controlPoints = this.spline.controlPoints.concat(
         this.spline.controlPoints.slice(0, this.spline.order - 1)
     );
+	 this.waterspline.controlPoints = this.waterspline.controlPoints.concat(
+        this.waterspline.controlPoints.slice(0, this.waterspline.order - 1)
+    );
 
 	this.createModel = function(parent) {
 		//estructura
-		structure = new SceneNode();
-		structure.create("estruc", null);
-		createRollerCoaster(structure, this.spline, this.railscolor);
-		parent.attachChild(structure);
+		this.structure = new SceneNode();
+		this.structure.create("estruc", null);
+		createRollerCoaster(this.structure, this.spline, this.railscolor);
+		parent.attachChild(this.structure);
 		
 		//carrito
 		this.car = new SceneNode();
 		this.car.create("car", null);
 		createCar("car", this.car, this.carcolor);
 		parent.attachChild(this.car);	
+		
+		//agua
+		this.water = new SceneNode();
+		this.water.create("water", null);
+		createWater(this.water, this.waterspline);
+		parent.attachChild(this.water);
+		this.water.translate([3,5,0]);
+		this.water.rotate(90, [0,0,1]);
+		
 	}
 	
 	
@@ -471,13 +496,45 @@ function arrayClone(arr) {
     }
 }
 
+function createWater(parent, waterspline) {
+	//contorno
+	var cutVerts = [[.15, .15], [-.15, .15], [-.15, -.15], [.15, -.15]];
+    var cutNormals = [[.7, .7], [-.7, .7], [-.7, -.7], [.7, -.7]];
+	var water = new ExtrusionSurface();
+    water.create("water", "lighting");
+    water.setupModelData(
+        cutVerts,
+        cutNormals,
+        lightblue,
+        waterspline,
+        50);
+    water.setupIndexBuffer();
+    water.setupGLBuffers();
+	parent.attachChild(water);
+	
+	//superficie
+	var positions = [];
+	var u = 0;
+	var pos;
+	for (u; u<1; u=u+0.01) {
+		pos = waterspline.pos(u);
+		positions.push(pos);
+	}
+	var shape = createFigure("superf", positions, lightblue);
+	parent.attachChild(shape);
+	shape.translate([0.0, 0.0, 0.16]);
+	shape.scale([1.04,1.04,1.04]);
+	
+}
+
+
 function createRollerCoaster(parent, spline, color) {
     
-    cutVerts = [[.08, .08], [-.08, .08], [-.08, -.08], [.08, -.08]];
-    cutNormals = [[.7, .7], [-.7, .7], [-.7, -.7], [.7, -.7]];
-    cutVertsLeft = arrayClone(cutVerts);
+    var cutVerts = [[.08, .08], [-.08, .08], [-.08, -.08], [.08, -.08]];
+    var cutNormals = [[.7, .7], [-.7, .7], [-.7, -.7], [.7, -.7]];
+    var cutVertsLeft = arrayClone(cutVerts);
     cutVertsLeft.forEach(function(v) { v[0] -= .4; });
-    cutVertsRight = arrayClone(cutVerts);
+    var cutVertsRight = arrayClone(cutVerts);
     cutVertsRight.forEach(function(v) { v[0] += .4; });
     
 	//rieles
