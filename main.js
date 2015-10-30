@@ -136,8 +136,6 @@ function drawScene() {
 	
 	//posicionar montaña rusa
 	montarusa.reset();
-//	montarusa.translate([2, 2, 0]);
-	
 	//animacion
 	tick += 0.5;
 	ferriswheel.animate(tick); 
