@@ -58,7 +58,7 @@
     </head>
     <body onload="main()">
         <center>
-            <canvas id="my-canvas" width="1024" height="576">
+            <canvas id="my-canvas" width="1024" height="576" onMouseMove="mouseMove(event);">
             Your browser does not support the HTML5 canvas element.
             </canvas>
             <br><br>
@@ -69,6 +69,11 @@
             Cam pos.y <input ondblclick="this.value=0.0" id="camposy" type="value" value="5.0" step="0.1"><br>
             Cam pos.z <input ondblclick="this.value=0.0" id="camposz" type="value" value="5.0" step="0.1"><br>
             -->
+            <u>Controls</u><br>
+            <b>W/S</b> - Forward/backward<br>
+            <b>A/D</b> - Strafe left/right<br>
+            <b>Arrows & LSHIFT+mouse</b> - Orient camera<br>
+            <b>C</b> - Cycle camera<br>
         </center>
     </body>
 </html>

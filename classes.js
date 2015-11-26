@@ -739,6 +739,20 @@ function Camera() {
         vec3.add(this.pos, this.pos, right);
     }
     
+    this.yaw = function(amount) {
+        this.dirAzi -= amount * Math.PI/500;
+    }
+    
+    this.pitch = function(amount) {
+        if(this.dirPolar > 0 && this.dirPolar < Math.PI) {
+            this.dirPolar += amount * Math.PI/500;
+            if(this.dirPolar <= 0)
+                this.dirPolar = 0.001;
+            if(this.dirPolar >= Math.PI)
+                this.dirPolar = Math.PI - 0.001
+        }
+    }
+    
     this.lookLeft = function() {
         this.dirAzi += Math.PI/100;
     }
@@ -750,8 +764,8 @@ function Camera() {
     this.lookUp = function() {
         if(this.dirPolar > 0) {
             this.dirPolar -= Math.PI/100;
-            if(this.dirPolar < 0)
-                this.dirPolar = 0;
+            if(this.dirPolar <= 0)
+                this.dirPolar = 0.01;
         }
     }
 

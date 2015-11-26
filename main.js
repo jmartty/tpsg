@@ -183,3 +183,14 @@ document.addEventListener('keydown', function(event) {
 
 }, true);
 
+// Controles via mouse
+mouseMove = function(event) {
+    if(event.shiftKey) {
+        if(event.movementX != 0) {
+            camera.yaw(event.movementX);
+        }
+        if(event.movementY != 0) {
+            camera.pitch(event.movementY);
+        }
+    }
+}
